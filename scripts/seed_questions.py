@@ -62,7 +62,9 @@ def main():
                                 options=q_data["options"],
                                 answer_idx=q_data["answer_idx"],
                                 explanation=q_data.get("explanation", ""),
-                                source_slide=q_data.get("source_slide", 0)
+                                source_slide=q_data.get("source_slide", 0),
+                                item_elo=q_data.get("item_elo", 1500),
+                                reviewed=q_data.get("reviewed", True),
                             )
                             db.add(question)
                 db.commit()

@@ -1,158 +1,126 @@
-import os
-from typing import Annotated, TypedDict, Literal
+from typing import Annotated, Literal, TypedDict
+
 from dotenv import load_dotenv
-
-from langchain_core.messages import BaseMessage, AIMessage, SystemMessage
-from langgraph.graph.message import add_messages
-from langgraph.graph import StateGraph, START, END
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import AIMessage, BaseMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
 
-import requests
-import json
-
-class CustomFPTChat:
-    def __init__(self, temperature=0):
-        self.token = "sk-H_YuLOl4y2dueOyIMJUFcq4X0FFF8MZg4-5u1QHlswQ="
-        self.url = "https://mkp-api.fptcloud.com/chat/completions"
-        self.model = "GLM-5.2"
-        self.temperature = temperature
-
-    def invoke(self, messages):
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.token}"
-        }
-        
-        formatted_msgs = []
-        for msg in messages:
-            role = "user"
-            if msg.type == "system":
-                role = "system"
-            elif msg.type == "ai":
-                role = "assistant"
-            formatted_msgs.append({"role": role, "content": msg.content})
-            
-        data = {
-            "model": self.model,
-            "messages": formatted_msgs,
-            "stream": False,
-            "temperature": self.temperature
-        }
-        
-        response = requests.post(self.url, headers=headers, json=data)
-        if not response.ok:
-            raise Exception(f"FPT API Error: {response.text}")
-            
-        answer = response.json()["choices"][0]["message"]["content"]
-        return AIMessage(content=answer)
-
-from sqlalchemy import text
 from .database import SessionLocal
+from .lecture_alias import resolve_lecture_id
+from .models import Concept, Lecture, Slide, SlideConcept
 
 load_dotenv()
+
+DEFAULT_REJECTION = "Xin lỗi, mình chỉ có thể trả lời các câu hỏi liên quan đến bài học. Bạn có thể nói rõ hơn được không?"
+
 
 class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
     lecture_id: str
     context: str
-    search_query: str
+    concept_ids: list[str]
     is_relevant: bool
 
-def evaluate_node(state: AgentState):
-    """
-    Evaluates if the question is relevant. If yes, generates a search query.
-    If no, sets is_relevant to False and responds.
-    """
-    llm = CustomFPTChat(temperature=0)
-    
-    lecture_id = state.get("lecture_id", "day01")
-    sys_prompt = f"""You are a routing agent for an educational chatbot answering questions about a lecture.
-The current lecture the user is learning is: {lecture_id}.
-Your STRICT goal is to ensure users only ask questions related to the lesson and its academic domain.
-Read the user's latest question and the conversation history.
-Determine if the user's question is:
-1. RELEVANT: Asking about the lecture, academic concepts, explanations, follow-up questions, or asking to summarize information/lesson/this. ASSUME ALL VAGUE REQUESTS FOR SUMMARIES OR HELP ARE RELEVANT TO THE CURRENT LECTURE ({lecture_id}).
-2. IRRELEVANT: ONLY use this for CLEARLY out-of-domain topics (weather, politics, sports) or pure gibberish.
 
-Output EXACTLY in one of these two formats:
-Format 1 (If relevant):
-RELEVANT: <a highly optimized search query capturing the core concepts to search in a vector database>
-(If they ask for a general summary, output: RELEVANT: tổng quát nội dung bài giảng {lecture_id})
+def route_node(state: AgentState):
+    """Call 1: định tuyến câu hỏi tới 1-3 concept_id, hoặc từ chối nếu ngoài đề."""
+    real_lecture_id = resolve_lecture_id(state.get("lecture_id", "day01"))
 
-Format 2 (If irrelevant):
-IRRELEVANT: <a polite response in Vietnamese declining to answer out-of-domain topics.>
-"""
-    
-    # We pass the system prompt and the messages
-    messages = [SystemMessage(content=sys_prompt)] + state["messages"]
-    
-    response = llm.invoke(messages)
-    
-    if isinstance(response.content, list):
-        content = "".join([item.get("text", "") for item in response.content if isinstance(item, dict) and "text" in item])
-    else:
-        content = str(response.content)
-        
-    content = content.strip()
-    
-    if content.startswith("RELEVANT:"):
-        query = content.replace("RELEVANT:", "").strip()
-        return {"is_relevant": True, "search_query": query}
-    else:
-        # Default to irrelevant if parsing fails or if it explicitly says IRRELEVANT
-        rejection_text = content.replace("IRRELEVANT:", "").strip()
-        if not rejection_text:
-            rejection_text = "Xin lỗi, mình chỉ có thể trả lời các câu hỏi liên quan đến bài học. Bạn có thể nói rõ hơn được không?"
-            
-        rejection_msg = AIMessage(content=rejection_text)
-        return {"is_relevant": False, "messages": [rejection_msg]}
-
-def retrieve_node(state: AgentState):
-    """Retrieves context from pgvector based on search_query."""
-    from .main import get_question_embedding
-    
-    query = state["search_query"]
-    lecture_id = state.get("lecture_id", "day01")
-    
-    # Embed query
-    vector = get_question_embedding(query)
-    
-    # Search DB
     db = SessionLocal()
     try:
-        sql = text("""
-            SELECT chunk_text 
-            FROM slide_embeddings se
-            JOIN slides s ON s.id = se.slide_id
-            WHERE s.lecture_id = :lecture_id
-            ORDER BY se.embedding <=> CAST(:vector AS vector)
-            LIMIT 5
-        """)
-        results = db.execute(sql, {
-            "lecture_id": lecture_id,
-            "vector": str(vector)
-        }).fetchall()
-        
-        context_chunks = "\n---\n".join([r[0] for r in results])
-        if not context_chunks:
-            context_chunks = "Không tìm thấy thông tin liên quan trong bài giảng này."
-        
-        return {"context": context_chunks}
+        concepts = db.query(Concept).filter(Concept.lecture_id == real_lecture_id).all()
     finally:
         db.close()
 
-def route_after_evaluation(state: AgentState) -> Literal["retrieve", "__end__"]:
+    concept_list = "\n".join(f"- {c.concept_id}: {c.name}" for c in concepts)
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0)
+
+    sys_prompt = f"""Bạn là bộ định tuyến cho chatbot hỏi đáp bài giảng.
+Danh sách concept của bài giảng đang mở:
+{concept_list}
+
+Đọc câu hỏi mới nhất của học viên và lịch sử hội thoại. Xác định:
+1. RELEVANT: câu hỏi liên quan tới bài giảng/lĩnh vực chuyên môn — chọn tối đa 3 concept_id liên quan nhất từ danh sách trên (đúng id, cách nhau bằng dấu phẩy). Nếu không concept nào khớp rõ nhưng câu hỏi vẫn thuộc bài giảng, để trống danh sách.
+2. IRRELEVANT: nói chuyện phiếm, ngoài lĩnh vực, hoặc quá mơ hồ để xác định phần nào của bài.
+
+Output ĐÚNG một trong hai format:
+RELEVANT: <concept_id1,concept_id2,...>
+IRRELEVANT: <câu trả lời lịch sự bằng tiếng Việt — nếu ngoài lề thì từ chối và hướng về bài học; nếu mơ hồ thì hỏi lại>
+"""
+
+    messages = [SystemMessage(content=sys_prompt)] + state["messages"]
+    response = llm.invoke(messages)
+
+    if isinstance(response.content, list):
+        content = "".join(item.get("text", "") for item in response.content if isinstance(item, dict) and "text" in item)
+    else:
+        content = str(response.content)
+    content = content.strip()
+
+    if content.startswith("RELEVANT:"):
+        raw_ids = content.replace("RELEVANT:", "").strip()
+        concept_ids = [c.strip() for c in raw_ids.split(",") if c.strip()]
+        return {"is_relevant": True, "concept_ids": concept_ids}
+
+    rejection_text = content.replace("IRRELEVANT:", "").strip() or DEFAULT_REJECTION
+    return {"is_relevant": False, "messages": [AIMessage(content=rejection_text)]}
+
+
+def retrieve_node(state: AgentState):
+    """Call DB thuần: lấy cụm slide của các concept đã định tuyến, có padding ±1."""
+    real_lecture_id = resolve_lecture_id(state.get("lecture_id", "day01"))
+    concept_ids = state.get("concept_ids") or []
+
+    db = SessionLocal()
+    try:
+        lecture = db.query(Lecture).filter(Lecture.lecture_id == real_lecture_id).first()
+        summary = lecture.summary if lecture else ""
+
+        slide_nos: set[int] = set()
+        if concept_ids:
+            ranges = db.query(SlideConcept).filter(
+                SlideConcept.lecture_id == real_lecture_id,
+                SlideConcept.concept_id.in_(concept_ids),
+            ).all()
+            for r in ranges:
+                start = max(1, r.slide_start - 1)
+                end = (r.slide_end or r.slide_start) + 1
+                slide_nos.update(range(start, end + 1))
+
+        parts = []
+        if summary:
+            parts.append(f"[Tóm tắt bài giảng]\n{summary}")
+
+        if slide_nos:
+            slides = db.query(Slide).filter(
+                Slide.lecture_id == real_lecture_id,
+                Slide.slide_no.in_(sorted(slide_nos)),
+            ).order_by(Slide.slide_no).all()
+            for s in slides:
+                if s.body_text:
+                    parts.append(f"[Slide {s.slide_no}]\n{s.body_text}")
+        elif not summary:
+            parts.append("Không tìm thấy thông tin liên quan trong bài giảng này.")
+
+        return {"context": "\n---\n".join(parts)}
+    finally:
+        db.close()
+
+
+def route_after_routing(state: AgentState) -> Literal["retrieve", "__end__"]:
     if state.get("is_relevant", False):
         return "retrieve"
     return "__end__"
 
-# Build graph
+
 workflow = StateGraph(AgentState)
-workflow.add_node("evaluate", evaluate_node)
+workflow.add_node("route", route_node)
 workflow.add_node("retrieve", retrieve_node)
 
-workflow.add_edge(START, "evaluate")
-workflow.add_conditional_edges("evaluate", route_after_evaluation)
+workflow.add_edge(START, "route")
+workflow.add_conditional_edges("route", route_after_routing)
 workflow.add_edge("retrieve", END)
 
 memory = MemorySaver()
