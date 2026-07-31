@@ -21,7 +21,7 @@
 | R4 · Kiểm thử | **15** | `spec.md` §7 + `eval/` |
 | R5 · Prototype chạy được | 8 | `codebase/` + demo |
 | R6 · Validation với user | 8 | `validation/` |
-| R7 · Quy trình & repo | 3 | cấu trúc repo |
+| R7 · Quy trình & repo | 3 | cấu trúc repo ||
 
 ### R1 · Bằng chứng & impact — 15
 
