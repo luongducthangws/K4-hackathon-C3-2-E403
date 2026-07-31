@@ -144,10 +144,12 @@
   .gen-sec{margin-bottom:14px}
   .gen-sec h6{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
   .auto-tag{font-size:.52rem;background:var(--green);color:#fff;border-radius:99px;padding:1px 7px;margin-left:4px;letter-spacing:0}
-  .cchip{display:inline-flex;align-items:center;gap:5px;border:1.4px solid var(--line);border-radius:99px;padding:4px 11px;margin:3px 3px 0 0;font-size:.68rem;cursor:pointer;user-select:none;background:var(--card)}
+  .cchip{display:inline-flex;align-items:center;gap:5px;flex-wrap:nowrap;border:1.4px solid var(--line);border-radius:99px;padding:4px 11px;margin:3px 3px 0 0;font-size:.68rem;cursor:pointer;user-select:none;background:var(--card);max-width:100%;white-space:nowrap;overflow:hidden}
   .cchip:hover{border-color:var(--blue)}
   .cchip.sel{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);font-weight:600}
-  .cchip .cp{font-family:var(--mono);font-size:.56rem;padding:0 5px;border-radius:99px;color:#fff}
+  .cchip > span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cchip .cdesc{display:none}
+  .cchip .cp{flex-shrink:0;font-family:var(--mono);font-size:.56rem;padding:0 5px;border-radius:99px;color:#fff}
   .cchip .cp.low{background:var(--red)} .cchip .cp.mid{background:var(--amber)} .cchip .cp.ok{background:var(--green)}
   .numrow{display:flex;align-items:center;gap:10px}
   .numrow input[type=range]{flex:1;accent-color:var(--blue)}
@@ -292,7 +294,7 @@
 
       <div class="tabview" id="viewTutor">
         <div id="chatLog">
-          <div class="chatmsg">Chào bạn 👋 Mình là VLearn Tutor — mình chỉ thấy được <b>từng slide</b>. Muốn học có lộ trình cả bài, dùng tab 🎯 Học thích ứng.</div>
+          <div class="chatmsg">Chào bạn 👋 Mình có thể trả lời bất cứ câu hỏi nào trong bài mà bạn thắc mắc</div>
         </div>
         <div class="chatline">
           <input id="chatInput" placeholder="Hỏi về slide đang mở…" onkeydown="if(event.key==='Enter')sendChat()">
@@ -315,13 +317,7 @@
               <h6>CONCEPT <span class="auto-tag">tự chọn theo mastery</span></h6>
               <div id="genConcepts"></div>
             </div>
-            <div class="gen-sec">
-              <h6>SỐ CÂU</h6>
-              <div class="numrow">
-                <input type="range" id="genN" min="3" max="8" value="4" oninput="document.getElementById('genNv').textContent=this.value">
-                <span id="genNv" style="font-family:var(--mono);font-size:.8rem;width:20px">4</span>
-              </div>
-            </div>
+
             <div class="gen-sec">
               <h6>ĐỘ KHÓ <span class="auto-tag">neo vào Elo cá nhân</span></h6>
               <div class="diffrow">
@@ -384,6 +380,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
+const API_BASE_URL = "https://dat-ballot-marketplace-save.trycloudflare.com";
+
 /* ===== TOAST ===== */
 let toastT;
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1800);}
@@ -414,6 +412,8 @@ function toggleDay(di){
 }
 function openFile(di,fi){
   curDay = di; curFile = fi;
+  DAYS.forEach(d => d.studying = false);
+  DAYS[di].studying = true;
   const f = DAYS[di].files[fi];
   TOTAL = f.p; curPage = 1;
   document.getElementById("docTitle").textContent = f.n;
@@ -451,17 +451,9 @@ async function renderSlide(){
   document.getElementById("pgTop").textContent = `Trang ${curPage} / ${TOTAL}`;
 
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
-  try {
-    const res = await fetch(`http://localhost:8000/slides/${dayName}/${curPage}`);
-    if(!res.ok) throw new Error("Not found");
-    const data = await res.json();
-    
-    // Hiển thị slide PDF gốc
-    const pdfFile = dayName === "day01" ? "d1-slide-hackathon.pdf" : "d2-slide-hackathon.pdf";
-    document.getElementById("slBody").innerHTML = `<iframe src="http://localhost:8000/static_slides/${pdfFile}#page=${curPage}&view=FitH" width="100%" height="100%" style="border:none; border-radius:8px; box-shadow:0 8px 28px rgba(20,40,90,.10);"></iframe>`;
-  } catch(e) {
-    document.getElementById("slBody").innerHTML = "<i style='color:#98a0ae'>Slide không có nội dung text (hoặc chưa bật server API)...</i>";
-  }
+  // PDF là nguồn hiển thị chính và không phụ thuộc metadata trong database.
+  const pdfFile = dayName === "day01" ? "d1-slide-hackathon.pdf" : "d2-slide-hackathon.pdf";
+  document.getElementById("slBody").innerHTML = `<iframe src="${API_BASE_URL}/static_slides/${pdfFile}#page=${curPage}&view=FitH" width="100%" height="100%" style="border:none; border-radius:8px; box-shadow:0 8px 28px rgba(20,40,90,.10);"></iframe>`;
   bindHighlight();
 }
 function nav(d){ curPage = Math.min(TOTAL, Math.max(1, curPage + d)); renderSlide(); }
@@ -518,7 +510,7 @@ async function sendChat(){
 
   try {
     const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
-    const res = await fetch("http://localhost:8000/chat", {
+    const res = await fetch(`${API_BASE_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -545,12 +537,33 @@ async function sendChat(){
     const reasonDetails = document.getElementById(reasonId);
     const reasonDiv = reasonDetails.querySelector("div");
     
-    let fullText = "";
-    let fullReason = "";
-    let isAnswering = false;
-    let buffer = "";
-    
-    while(true) {
+     let fullText = "";
+     let fullReason = "";
+     let isAnswering = false;
+     let buffer = "";
+     let answerQueue = "";
+     let typewriterDone = false;
+     let typewriterResolve;
+     const typewriterFinished = new Promise(resolve => { typewriterResolve = resolve; });
+
+     const typeNextCharacter = () => {
+         if (answerQueue) {
+             fullText += answerQueue[0];
+             answerQueue = answerQueue.substring(1);
+             msgEl.textContent = fullText;
+             log.scrollTop = log.scrollHeight;
+             window.setTimeout(typeNextCharacter, answerQueue.length > 100 ? 0 : 20);
+             return;
+         }
+         if (typewriterDone) typewriterResolve();
+     };
+
+     const enqueueAnswer = (answer) => {
+         answerQueue += answer;
+         if (fullText.length === 0 && answerQueue.length === answer.length) typeNextCharacter();
+     };
+
+     while(true) {
         const {done, value} = await reader.read();
         if(done) break;
         
@@ -580,21 +593,23 @@ async function sendChat(){
                             reasonDetails.open = false; // collapse thinking when answer starts
                             reasonDetails.querySelector("summary").textContent = "💡 Đã suy nghĩ xong";
                         }
-                        isAnswering = true;
-                        fullText += data.answer;
-                        msgEl.innerHTML = fullText.replace(/\n/g, "<br>");
-                        log.scrollTop = log.scrollHeight;
+                         isAnswering = true;
+                         enqueueAnswer(data.answer);
+
                     }
                 } catch(e) {
                     console.error("Lỗi parse JSON:", e, jsonStr);
                 }
             }
         }
-    }
-    
-    msgEl.innerHTML = fullText.replace(/\n/g, "<br>") + `<div class="fb"><span onclick="fb(this,1)">👍</span><span onclick="fb(this,0)">👎</span></div>`;
-    
-  } catch(e) {
+     }
+
+     typewriterDone = true;
+     if (!answerQueue) typewriterResolve();
+     await typewriterFinished;
+      msgEl.insertAdjacentHTML("afterend", `<div class="fb"><span onclick="fb(this,1)">👍</span><span onclick="fb(this,0)">👎</span></div>`);
+
+    } catch(e) {
     const loader = document.getElementById(loadingId);
     if (loader) loader.remove();
     log.insertAdjacentHTML("beforeend", `<div class="chatmsg" style="color:var(--red)">Lỗi kết nối Backend. Khởi động lại Server hoặc thử lại.</div>`);
@@ -628,7 +643,7 @@ const DAY_CONCEPTS = {
   4:D5,
 };
 function activeConcepts(){ return window.CURRENT_CONCEPTS || D5; }
-const ITEM_ELO = 1500, K = 64;
+const ITEM_ELO = 1500, K = 64, DEFAULT_QUESTION_COUNT = 4;
 const expected = (s,d)=>1/(1+Math.pow(10,(d-s)/400));
 const pct = e=>Math.round(expected(e,ITEM_ELO)*100);
 function upd(c,ok){
@@ -689,7 +704,7 @@ async function renderGenConcepts(){
   // Fetch concepts from backend
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   try {
-    const res = await fetch(`http://localhost:8000/concepts/${dayName}`);
+    const res = await fetch(`${API_BASE_URL}/concepts/${dayName}`);
     if (res.ok) {
       const data = await res.json();
       window.CURRENT_CONCEPTS = data;
@@ -704,12 +719,29 @@ async function renderGenConcepts(){
   if(genSelected.size===0) sorted.slice(0, Math.max(2, sorted.filter(c=>pct(c.elo)<50).length)).forEach(c=>genSelected.add(c.id));
   
   const dayNameDisplay = DAYS[curDay] ? DAYS[curDay].name : "Day05";
-  document.getElementById("genConcepts").innerHTML =
-    `<div style="font-size:.62rem;color:var(--muted);margin-bottom:5px">📄 Concept của <b>${dayNameDisplay}</b> (Tải từ DB)</div>` +
-    sorted.map(c=>{
-      const p = pct(c.elo), cls = p>=65?"ok":p>=50?"mid":"low";
-      return `<span class="cchip ${genSelected.has(c.id)?'sel':''}" onclick="toggleGenC('${c.id}')">${c.name}<span class="cp ${cls}">${p}%</span></span>`;
-    }).join("");
+  const conceptsEl = document.getElementById("genConcepts");
+  conceptsEl.replaceChildren();
+  const heading = document.createElement("div");
+  heading.style.cssText = "font-size:.62rem;color:var(--muted);margin-bottom:5px";
+  heading.textContent = `📄 Concept của ${dayNameDisplay} (Tải từ DB)`;
+  conceptsEl.append(heading);
+  sorted.forEach(c=>{
+    const p = pct(c.elo), cls = p>=65?"ok":p>=50?"mid":"low";
+    const shortDescription = c.description?.trim().split(/[.!?]/)[0] || "Ôn tập theo mastery";
+    const chip = document.createElement("span");
+    chip.className = `cchip ${genSelected.has(c.id)?"sel":""}`;
+    chip.addEventListener("click", ()=>toggleGenC(c.id));
+    const name = document.createElement("span");
+    name.textContent = c.name;
+    const mastery = document.createElement("span");
+    mastery.className = `cp ${cls}`;
+    mastery.textContent = `${p}%`;
+    const description = document.createElement("span");
+    description.className = "cdesc";
+    description.textContent = shortDescription;
+    chip.append(name, mastery, description);
+    conceptsEl.append(chip);
+  });
 }
 function toggleGenC(id){ genSelected.has(id) ? genSelected.delete(id) : genSelected.add(id); renderGenConcepts(); }
 document.addEventListener("click", e=>{
@@ -721,12 +753,12 @@ async function startQuiz(){
   if(genSelected.size===0){ toast("Chọn ít nhất 1 concept"); return; }
   document.getElementById("genLoading").style.display = "block";
   
-  const n = +document.getElementById("genN").value;
+  const n = DEFAULT_QUESTION_COUNT;
   const diff = document.querySelector("input[name=gdiff]:checked").value;
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   
   try {
-    const res = await fetch("http://localhost:8000/quiz/generate", {
+    const res = await fetch(`${API_BASE_URL}/quiz/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
