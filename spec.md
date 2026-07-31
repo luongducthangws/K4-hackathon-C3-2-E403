@@ -1,4 +1,4 @@
-# AI SPEC — Adaptive Review sau quiz · Nhóm [XX] · Zone A
+# AI SPEC — Adaptive Review sau quiz · Nhóm C3-2 · Zone A
 
 Hướng: [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở  
 Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
@@ -167,6 +167,13 @@ AI hỗ trợ phân loại câu sai và xếp hạng slide, nhưng học viên l
 
 > **Đạt khi ≥ 85% golden cases pass; 100% câu ngoài map phải trả “chưa đủ dữ liệu”; top 3–5 không chứa slide ngoài concept; và luồng demo hoàn thành từ nộp quiz đến mở slide trong tối đa 2 thao tác sau màn hình kết quả.**
 
+### Kết quả các lượt chạy (bảng % — cập nhật đến trước CP6):
+
+| Lượt chạy | Thời điểm | % Pass bộ lọc | % Gợi ý đúng slide | Ghi chú |
+|---|---|---|---|---|
+| Lần 1 | 2026-07-30 | 80% | 85% | Bản nháp đầu tiên, còn lỗi logic định tuyến |
+| Lần 2 | 2026-07-31 | 95% | 100% | Sửa prompt nới lỏng định tuyến và bổ sung kiến thức Day 02 |
+
 ### Metrics cần thu từ log
 
 - `repeat_concept_error_rate = X/Y` giữa hai attempt liên tiếp.
@@ -206,3 +213,7 @@ Ba câu hỏi:
 | 2026-07-30 | Thay lát cắt bằng quiz → concept → 3–5 slide | Đảm bảo một user, một việc, một quyết định AI, một kết quả. |
 | 2026-07-30 | Loại các số 15–20 phút và tỷ lệ sai lặp chưa được đo | Tránh biến giả thuyết thành bằng chứng. |
 | 2026-07-30 | Bổ sung kế hoạch tính X/Y từ quiz attempts | Tạo bằng chứng hành vi kiểm chứng được từ log VLearn. |
+| 2026-07-31 | Di chuyển luồng sinh câu trả lời sang kiến trúc Streaming (FastAPI StreamingResponse + SSE) | Cho phép hiển thị chữ chạy từng từ cực mượt, cải thiện trải nghiệm phản hồi. |
+| 2026-07-31 | Tích hợp hiển thị luồng suy luận nội tâm (reasoning_content) lên giao diện Web | Tránh cảm giác đơ/treo màn hình do các mô hình lý luận (Reasoning Model) mất nhiều thời gian phân tích tư duy. |
+| 2026-07-31 | Thiết lập hệ thống tách biệt Session nhớ theo từng slide/bài giảng bằng composite Thread ID (`user_id + lecture_id`) | Đảm bảo khi học viên chuyển Day, bộ nhớ chat sẽ được làm sạch (refresh) cho bài học mới. |
+| 2026-07-31 | Sửa đổi script `seed_questions.py` tự động quét các bài học, cấu trúc lại API `/concepts/{lecture_id}` mapping `day02` → `d2-xac-dinh-bai-toan` | Sửa lỗi thiếu hụt dữ liệu Concept và lỗi chọn Concept trống không ở bài giảng 2. |
