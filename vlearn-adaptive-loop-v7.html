@@ -19,17 +19,38 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden;transition:background .25s}
 
-  .topbar{display:flex;align-items:center;gap:14px;background:var(--card);border-bottom:1px solid var(--line);padding:10px 18px;flex-shrink:0}
-  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.15rem;color:var(--blue)}
-  .logo .vmark{width:26px;height:26px;background:var(--blue);border-radius:6px;display:grid;place-items:center;color:#fff;font-size:.85rem}
-  .doc-title{font-weight:700;font-size:.95rem}
-  .doc-sub{font-size:.72rem;color:var(--muted)}
-  .top-right{margin-left:auto;display:flex;gap:8px;align-items:center}
-  .pill{font-size:.7rem;font-family:var(--mono);border:1px solid var(--blue-line);color:var(--blue);border-radius:99px;padding:3px 10px;background:var(--blue-soft);cursor:pointer;user-select:none}
+  .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;height:56px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.04);z-index:20}
+  .top-left{display:flex;align-items:center;gap:14px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.2rem;color:var(--blue);letter-spacing:-0.02em}
+  .logo .vmark{width:28px;height:28px;background:linear-gradient(135deg,var(--blue) 0%,#3b82f6 100%);border-radius:7px;display:grid;place-items:center;color:#fff;font-size:.85rem;box-shadow:0 2px 6px rgba(32,88,201,0.25)}
+  .divider-v{width:1px;height:22px;background:var(--line);margin:0 4px}
+  .doc-meta{display:flex;flex-direction:column}
+  .doc-title{font-weight:700;font-size:.88rem;color:var(--ink);line-height:1.25}
+  .doc-sub{font-size:.66rem;color:var(--muted);line-height:1.2}
 
-  .layout{display:grid;grid-template-columns:235px 1fr 370px;flex:1;min-height:0}
+  .top-right{display:flex;align-items:center;gap:12px}
+  .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-family:var(--mono);font-weight:600;color:var(--green);background:var(--green-soft);border:1px solid rgba(22,163,74,0.25);border-radius:99px;padding:3px 11px}
+  .status-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 
-  .sidebar{background:var(--card);border-right:1px solid var(--line);padding:14px 10px;overflow-y:auto}
+  .userchip{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:600;border:1px solid var(--blue-line);color:var(--blue);border-radius:99px;padding:4px 14px;background:var(--blue-soft);cursor:pointer;transition:all .15s ease}
+  .userchip:hover{filter:brightness(1.06);box-shadow:0 2px 6px rgba(32,88,201,0.18)}
+  .userchip .u-avatar{font-size:.85rem}
+
+  .icon-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;font-size:.9rem;transition:all .15s ease}
+  .icon-btn:hover{border-color:var(--blue);background:var(--blue-soft)}
+  :root{
+    --sidebar-w: 235px;
+    --panel-w: 370px;
+  }
+  .layout{display:grid;grid-template-columns:var(--sidebar-w) 6px 1fr 6px var(--panel-w);flex:1;min-height:0}
+
+  .resizer{width:6px;background:transparent;cursor:col-resize;user-select:none;z-index:10;transition:background .15s ease;display:flex;align-items:center;justify-content:center}
+  .resizer:hover, .resizer.resizing{background:var(--blue-soft)}
+  .resizer::after{content:"";width:2px;height:36px;background:var(--line);border-radius:99px;transition:background .15s ease}
+  .resizer:hover::after, .resizer.resizing::after{background:var(--blue)}
+
+  .sidebar{background:var(--card);border-right:1px solid var(--line);padding:14px 10px;overflow-y:auto;min-width:0;transition:opacity .2s ease, padding .25s ease}
+  .sidebar.collapsed{padding:14px 0;overflow:hidden;opacity:0;pointer-events:none}
   .sidebar h3{font-size:.82rem;margin:0 6px 4px}
   .sidebar .sh{font-size:.62rem;color:var(--muted);margin:0 6px 12px}
   .day{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:6px;font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
@@ -48,6 +69,13 @@
   .viewer{display:flex;flex-direction:column;min-width:0;padding:14px 18px;overflow:hidden}
   .viewer-tools{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin-bottom:12px;font-size:.76rem;color:var(--muted)}
   .tool{padding:5px 10px;border-radius:7px;cursor:pointer;user-select:none}
+
+  .side-btn{font-family:inherit;font-size:.7rem;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;gap:4px;user-select:none;transition:all .15s ease}
+  .side-btn:hover{color:var(--blue);border-color:var(--blue-line);background:var(--blue-soft)}
+
+  .panel{background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0;transition:opacity .2s ease, padding .25s ease}
+  .panel.collapsed{overflow:hidden;opacity:0;pointer-events:none}
+
   .tool:hover{background:var(--blue-soft)}
   .tool.on{background:var(--blue);color:#fff}
   .ztool{cursor:pointer;padding:3px 9px;border:1px solid var(--line);border-radius:6px;user-select:none}
@@ -90,6 +118,12 @@
   .chatmsg{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.78rem;margin-bottom:10px;color:var(--ink);line-height:1.55}
   .chatmsg small{color:var(--muted)}
   .chatmsg.user{background:var(--blue);color:#fff;border:none;margin-left:44px}
+  .chatmsg ul{margin:6px 0 6px 16px;padding:0}
+  .chatmsg li{margin-bottom:3px;line-height:1.45}
+  .chatmsg b, .chatmsg strong{font-weight:700;color:var(--blue-dark)}
+  body.dark .chatmsg b, body.dark .chatmsg strong{color:#60a5fa}
+  .chatmsg.user b, .chatmsg.user strong{color:#fff}
+  .chatmsg code.mono-code{background:rgba(0,0,0,0.06);padding:2px 5px;border-radius:4px;font-family:var(--mono);font-size:.85em}
   .fb{display:flex;gap:6px;margin-top:6px}
   .fb span{cursor:pointer;font-size:.85rem;opacity:.45;user-select:none}
   .fb span.sel{opacity:1;transform:scale(1.15)}
@@ -186,7 +220,49 @@
   .survey-item .scale{display:flex;justify-content:space-between;font-size:.58rem;color:#8a93a6;margin-top:2px}
   .survey-item input[type=range]{width:100%;accent-color:var(--blue)}
   .userchip{font-size:.7rem;font-family:var(--mono);border:1px solid var(--blue-line);color:var(--blue);border-radius:99px;padding:3px 10px;background:var(--blue-soft);cursor:pointer}
+
+  /* ===== PHASE 0 UX REFACTORED ===== */
+  .phase-header{margin-bottom:16px}
+  .phase-header h3{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .phase-header .sub{font-size:.72rem;color:var(--muted);line-height:1.45}
+
+  .sec-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .sec-title-row h6{font-size:.78rem;font-weight:700;color:var(--ink)}
+  .sec-title{font-size:.78rem;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .link-btn{background:none;border:none;font-size:.7rem;color:var(--blue);cursor:pointer;text-decoration:underline;font-family:inherit}
+
+  .concept-list-container{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+  .concept-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:all .15s ease}
+  .concept-item:hover{border-color:var(--blue-line);background:var(--blue-soft)}
+  .concept-item.sel{border-color:var(--blue);background:var(--blue-soft)}
+  .concept-item input[type=checkbox]{accent-color:var(--blue);cursor:pointer}
+  .concept-item .c-info{flex:1;min-width:0}
+  .concept-item .c-name{font-size:.75rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+  .concept-item .c-bar-wrap{height:4px;width:100%;background:var(--line);border-radius:99px;overflow:hidden}
+  .concept-item .c-bar-inner{height:100%;border-radius:99px;transition:width .3s ease}
+  .concept-item .c-pct{font-size:.7rem;font-family:var(--mono);color:var(--muted);font-weight:600;min-width:32px;text-align:right}
+
+  .more-btn{width:100%;background:var(--card);border:1px dashed var(--blue-line);color:var(--blue);font-size:.72rem;font-weight:600;padding:7px;border-radius:8px;cursor:pointer;text-align:center;margin-top:4px;font-family:inherit}
+  .more-btn:hover{background:var(--blue-soft)}
+
+  .stepper-wrap{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:8px}
+  .stepper-wrap input[type=range]{flex:1;accent-color:var(--blue)}
+  .stepper-val{font-family:var(--mono);font-weight:700;font-size:.82rem;color:var(--blue);min-width:48px;text-align:right}
+
+  .segmented-control{display:flex;background:var(--line);padding:3px;border-radius:9px;gap:2px}
+  .seg-item{flex:1;text-align:center;cursor:pointer}
+  .seg-item input{display:none}
+  .seg-item span{display:block;padding:8px 4px;font-size:.74rem;font-weight:600;color:var(--muted);border-radius:7px;transition:all .15s ease}
+  .seg-item input:checked + span{background:var(--card);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.1);font-weight:700}
+
+  .quiz-summary-card{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:10px;padding:12px 14px;margin:16px 0}
+  .qs-head{font-size:.76rem;font-weight:700;color:var(--blue-dark);margin-bottom:6px}
+  .qs-body{font-size:.72rem;color:var(--ink);line-height:1.6;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+  .qs-row b{color:var(--blue)}
+
+  .cta-btn{width:100%;padding:13px;font-size:.88rem;font-weight:700;border-radius:10px}
 </style>
+
 </head>
 <body>
 
@@ -246,23 +322,35 @@
 </div>
 
 <div class="topbar">
-  <div class="logo"><span class="vmark">▶</span> VLearn</div>
-  <div>
-    <div class="doc-title" id="docTitle">d1-slide-hackathon.pdf</div>
-    <div class="doc-sub">COMP2010 · Lecture_material_ms204v3b_r9mo78Week_03_Optimization</div>
+  <div class="top-left">
+    <div class="logo">
+      <span class="vmark">▶</span>
+      <span>VLearn</span>
+    </div>
+    <div class="divider-v"></div>
+    <div class="doc-meta">
+      <div class="doc-title" id="docTitle">d1-slide-hackathon.pdf</div>
+      <div class="doc-sub">COMP2010 · Optimization & Generative AI</div>
+    </div>
   </div>
+
   <div class="top-right">
-    <span class="pill">CP2 PROTOTYPE · MOCK</span>
-    <span class="userchip" id="userChip" onclick="logout()" title="Bấm để đăng xuất">👤 —</span>
-    <span class="pill" onclick="document.body.classList.toggle('dark')">🌙</span>
+    <span class="status-badge"><i class="dot"></i> Live DB</span>
+    <div class="userchip" id="userChip" onclick="logout()" title="Bấm để đăng xuất">
+      <span class="u-avatar">👤</span>
+      <span id="userNameTxt">—</span>
+    </div>
+    <button class="icon-btn" onclick="document.body.classList.toggle('dark')" title="Chuyển chế độ Sáng/Tối">🌙</button>
   </div>
 </div>
 
-<div class="layout">
+<div class="layout" id="appLayout">
   <aside class="sidebar" id="sidebar"></aside>
+  <div class="resizer" id="resizerLeft" title="Kéo để thay đổi độ rộng Sidebar"></div>
 
   <main class="viewer">
     <div class="viewer-tools">
+      <button class="side-btn" id="btnSidebar" onclick="toggleSidebar()" title="Thu gọn / Mở rộng Sidebar bên trái">◀ Sidebar</button>
       <span class="tool on" id="toolRead" onclick="setTool('read')">🖱 Đọc</span>
       <span class="tool" id="toolPen" onclick="setTool('pen')">✏️ Bút</span>
       <span class="tool" id="toolHl" onclick="setTool('hl')">🖍 Highlight</span>
@@ -271,6 +359,7 @@
       <span class="ztool" onclick="zoom(0.1)">+</span>
       <span class="ztool" onclick="clearPen()" title="Xoá nét vẽ">🗑</span>
       <span class="pg" id="pgTop"></span>
+      <button class="side-btn" id="btnPanel" onclick="togglePanel()" title="Thu gọn / Mở rộng Panel bên phải" style="margin-left:auto">Panel ▶</button>
     </div>
 
     <!-- SLIDE VIEWER -->
@@ -283,6 +372,8 @@
       </div>
     </div>
   </main>
+
+  <div class="resizer" id="resizerRight" title="Kéo để thay đổi độ rộng Panel"></div>
   <aside class="panel">
     <div class="panel-tabs">
       <button id="tabTutor" onclick="switchTab('tutor')">🤖 VLearn Tutor</button>
@@ -292,7 +383,7 @@
 
       <div class="tabview" id="viewTutor">
         <div id="chatLog">
-          <div class="chatmsg">Chào bạn 👋 Mình là VLearn Tutor — mình chỉ thấy được <b>từng slide</b>. Muốn học có lộ trình cả bài, dùng tab 🎯 Học thích ứng.</div>
+          <div class="chatmsg">Chào bạn 👋 Mình là <b>VLearn Tutor</b> — trợ lý AI giải đáp thắc mắc về toàn bộ bài giảng và các slide. Bạn có câu hỏi nào về kiến thức bài học, cứ chia sẻ với mình nhé!</div>
         </div>
         <div class="chatline">
           <input id="chatInput" placeholder="Hỏi về slide đang mở…" onkeydown="if(event.key==='Enter')sendChat()">
@@ -309,30 +400,62 @@
 
           <!-- PHASE 0: CONFIG -->
           <div class="fs on" id="p0">
-            <div class="phase-tag">BƯỚC 1 · ĐO — TẠO QUIZ CÁ NHÂN HOÁ</div>
-            <div class="sub">Mặc định điền sẵn theo hồ sơ mastery của <b>Minh Anh</b> cho tài liệu đang mở.</div>
-            <div class="gen-sec">
-              <h6>CONCEPT <span class="auto-tag">tự chọn theo mastery</span></h6>
-              <div id="genConcepts"></div>
+            <div class="phase-header">
+              <h3>Tạo Quiz Cá nhân hóa</h3>
+              <div class="sub">Tự động thiết kế câu hỏi dựa trên mức độ thành thạo hiện tại của bạn.</div>
             </div>
+
             <div class="gen-sec">
-              <h6>SỐ CÂU</h6>
-              <div class="numrow">
-                <input type="range" id="genN" min="3" max="8" value="4" oninput="document.getElementById('genNv').textContent=this.value">
-                <span id="genNv" style="font-family:var(--mono);font-size:.8rem;width:20px">4</span>
+              <div class="sec-title-row">
+                <h6>📚 Chủ đề được kiểm tra (<span id="selCount">0</span>)</h6>
+                <button class="link-btn" onclick="toggleSelectAllConcepts()" id="btnSelAll">Chọn tất cả</button>
+              </div>
+              
+              <div id="genConceptsList" class="concept-list-container"></div>
+              
+              <button class="more-btn" id="btnToggleMoreConcepts" onclick="toggleMoreConcepts()" style="display:none;"></button>
+            </div>
+
+            <div class="gen-sec" style="margin-top:14px">
+              <div class="sec-title">🎯 Số lượng câu hỏi</div>
+              <div class="stepper-wrap">
+                <input type="range" id="genN" min="3" max="8" value="4" oninput="updateGenN(this.value)">
+                <span class="stepper-val" id="genNv">4 câu</span>
               </div>
             </div>
-            <div class="gen-sec">
-              <h6>ĐỘ KHÓ <span class="auto-tag">neo vào Elo cá nhân</span></h6>
-              <div class="diffrow">
-                <label class="diffopt"><input type="radio" name="gdiff" value="easy">Dễ hơn trình độ<br><small>P ≈ 75%</small></label>
-                <label class="diffopt sel"><input type="radio" name="gdiff" value="auto" checked>Vùng tối ưu ★<br><small>P ≈ 50%</small></label>
-                <label class="diffopt"><input type="radio" name="gdiff" value="hard">Thử thách<br><small>P ≈ 30%</small></label>
+
+            <div class="gen-sec" style="margin-top:14px">
+              <div class="sec-title">⚡ Độ khó câu hỏi</div>
+              <div class="segmented-control">
+                <label class="seg-item">
+                  <input type="radio" name="gdiff" value="easy" onchange="updateSummary()">
+                  <span>Dễ</span>
+                </label>
+                <label class="seg-item active">
+                  <input type="radio" name="gdiff" value="auto" checked onchange="updateSummary()">
+                  <span>Phù hợp ★</span>
+                </label>
+                <label class="seg-item">
+                  <input type="radio" name="gdiff" value="hard" onchange="updateSummary()">
+                  <span>Thử thách</span>
+                </label>
               </div>
             </div>
-            <button class="btn" onclick="startQuiz()">⚡ Tạo quiz vòng <span id="rN1">1</span></button>
+
+            <div class="quiz-summary-card">
+              <div class="qs-head">📋 Tóm tắt lượt làm bài</div>
+              <div class="qs-body">
+                <div class="qs-row"><span>• Chủ đề:</span> <b id="qsCount">0 concept</b></div>
+                <div class="qs-row"><span>• Số lượng:</span> <b id="qsN">4 câu hỏi</b></div>
+                <div class="qs-row"><span>• Độ khó:</span> <b id="qsDiff">Phù hợp ★</b></div>
+                <div class="qs-row"><span>• Thời gian:</span> <b>~3-5 phút</b></div>
+              </div>
+            </div>
+
+            <button class="btn cta-btn" onclick="startQuiz()">⚡ Tạo Quiz Cá nhân hóa (Vòng <span id="rN1">1</span>)</button>
+
             <div id="genLoading" style="display:none;text-align:center;padding:16px;font-size:.74rem;color:var(--muted)">
-              <div class="spin"></div>Đang chọn câu theo mastery từng concept…
+              <div class="spin"></div>Đang chọn câu hỏi phù hợp từ cơ sở dữ liệu…
             </div>
           </div>
 
@@ -582,7 +705,7 @@ async function sendChat(){
                         }
                         isAnswering = true;
                         fullText += data.answer;
-                        msgEl.innerHTML = fullText.replace(/\n/g, "<br>");
+                        msgEl.innerHTML = parseMarkdown(fullText);
                         log.scrollTop = log.scrollHeight;
                     }
                 } catch(e) {
@@ -592,7 +715,7 @@ async function sendChat(){
         }
     }
     
-    msgEl.innerHTML = fullText.replace(/\n/g, "<br>") + `<div class="fb"><span onclick="fb(this,1)">👍</span><span onclick="fb(this,0)">👎</span></div>`;
+    msgEl.innerHTML = parseMarkdown(fullText) + `<div class="fb"><span onclick="fb(this,1)">👍</span><span onclick="fb(this,0)">👎</span></div>`;
     
   } catch(e) {
     const loader = document.getElementById(loadingId);
@@ -600,6 +723,34 @@ async function sendChat(){
     log.insertAdjacentHTML("beforeend", `<div class="chatmsg" style="color:var(--red)">Lỗi kết nối Backend. Khởi động lại Server hoặc thử lại.</div>`);
   }
   log.scrollTop = log.scrollHeight;
+}
+
+function parseMarkdown(txt){
+  if(!txt) return "";
+  let html = txt;
+  html = html.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+  html = html.replace(/(^|[^\*])\*(?!\*\s)([^\*]+)\*/g, "$1<i>$2</i>");
+  html = html.replace(/`(.*?)`/g, '<code class="mono-code">$1</code>');
+  html = html.replace(/^### (.*$)/gim, "<h5>$1</h5>");
+  html = html.replace(/^## (.*$)/gim, "<h4>$1</h4>");
+  html = html.replace(/^# (.*$)/gim, "<h3>$1</h3>");
+  let lines = html.split("\n"), inList = false, result = [];
+  for(let l of lines){
+    let m = l.match(/^\s*[\*\-\•]\s+(.*)$/);
+    if(m){
+      if(!inList){ result.push("<ul>"); inList = true; }
+      result.push(`<li>${m[1]}</li>`);
+    } else {
+      if(inList){ result.push("</ul>"); inList = false; }
+      result.push(l);
+    }
+  }
+  if(inList) result.push("</ul>");
+  html = result.join("\n");
+  html = html.replace(/\n/g, "<br>");
+  html = html.replace(/<\/ul><br>/g, "</ul>");
+  html = html.replace(/<br><ul/g, "<ul");
+  return html;
 }
 function fb(el,v){ el.parentElement.querySelectorAll("span").forEach(s=>s.classList.remove("sel")); el.classList.add("sel"); toast(v?"👍 đã ghi nhận":"👎 đã ghi nhận"); }
 
@@ -613,32 +764,44 @@ function switchTab(t){
 
 /* ===== CONCEPTS PER DAY ===== */
 const D5 = [
-  {id:"c1", name:"Bias–Variance tradeoff", elo:1420, slides:[8,9]},
-  {id:"c2", name:"Dấu hiệu overfitting",   elo:1560, slides:[14]},
-  {id:"c3", name:"L2 Regularization",      elo:1350, slides:[27,28]},
-  {id:"c4", name:"L1 Regularization",      elo:1300, slides:[33,34]},
-  {id:"c5", name:"Early stopping",         elo:1610, slides:[45]},
-  {id:"c6", name:"Dropout",                elo:1480, slides:[52,53]},
+  {id:"c1", name:"Bias–Variance tradeoff", elo:1400, slides:[8,9]},
+  {id:"c2", name:"Dấu hiệu overfitting",   elo:1400, slides:[14]},
+  {id:"c3", name:"L2 Regularization",      elo:1400, slides:[27,28]},
+  {id:"c4", name:"L1 Regularization",      elo:1400, slides:[33,34]},
+  {id:"c5", name:"Early stopping",         elo:1400, slides:[45]},
+  {id:"c6", name:"Dropout",                elo:1400, slides:[52,53]},
 ];
 const DAY_CONCEPTS = {
-  0:[{id:"d1a",name:"AI product vs software truyền thống",elo:1450,slides:[3]},{id:"d1b",name:"Xác suất & không chắc chắn",elo:1380,slides:[9]},{id:"d1c",name:"Vòng đời sản phẩm AI",elo:1520,slides:[15]}],
-  1:[{id:"d2a",name:"Phỏng vấn người dùng cho AI",elo:1400,slides:[5]},{id:"d2b",name:"Jobs-to-be-done",elo:1470,slides:[12]},{id:"d2c",name:"Ngưỡng chấp nhận sai",elo:1330,slides:[20]}],
-  2:[{id:"d3a",name:"Chiến lược dữ liệu",elo:1440,slides:[4]},{id:"d3b",name:"Data flywheel",elo:1360,slides:[16]},{id:"d3c",name:"Đánh giá dataset",elo:1500,slides:[28]}],
-  3:[{id:"d4a",name:"Zero-shot vs few-shot",elo:1490,slides:[6]},{id:"d4b",name:"Chain-of-thought",elo:1370,slides:[18]},{id:"d4c",name:"Prompt injection",elo:1290,slides:[30]},{id:"d4d",name:"Đánh giá output LLM",elo:1430,slides:[40]}],
+  0:[{id:"d1a",name:"AI product vs software truyền thống",elo:1400,slides:[3]},{id:"d1b",name:"Xác suất & không chắc chắn",elo:1400,slides:[9]},{id:"d1c",name:"Vòng đời sản phẩm AI",elo:1400,slides:[15]}],
+  1:[{id:"d2a",name:"Phỏng vấn người dùng cho AI",elo:1400,slides:[5]},{id:"d2b",name:"Jobs-to-be-done",elo:1400,slides:[12]},{id:"d2c",name:"Ngưỡng chấp nhận sai",elo:1400,slides:[20]}],
+  2:[{id:"d3a",name:"Chiến lược dữ liệu",elo:1400,slides:[4]},{id:"d3b",name:"Data flywheel",elo:1400,slides:[16]},{id:"d3c",name:"Đánh giá dataset",elo:1400,slides:[28]}],
+  3:[{id:"d4a",name:"Zero-shot vs few-shot",elo:1400,slides:[6]},{id:"d4b",name:"Chain-of-thought",elo:1400,slides:[18]},{id:"d4c",name:"Prompt injection",elo:1400,slides:[30]},{id:"d4d",name:"Đánh giá output LLM",elo:1400,slides:[40]}],
   4:D5,
 };
 function activeConcepts(){ return window.CURRENT_CONCEPTS || D5; }
 const ITEM_ELO = 1500, K = 64;
 const expected = (s,d)=>1/(1+Math.pow(10,(d-s)/400));
-const pct = e=>Math.round(expected(e,ITEM_ELO)*100);
+const pct = (c_or_elo, n_att)=>{
+  let elo = typeof c_or_elo === 'object' ? c_or_elo.elo : c_or_elo;
+  let n = typeof c_or_elo === 'object' ? c_or_elo.n_attempts : n_att;
+  if(!n || n === 0) return 0;
+  return Math.round(expected(elo, ITEM_ELO)*100);
+};
+
 function upd(c,ok){
-  // Đồng bộ elo ngược lại lên AC
   const acConcept = activeConcepts().find(x => x.id === c.id);
   const curElo = acConcept ? acConcept.elo : c.elo;
-  const p=expected(curElo,ITEM_ELO);
-  const d=Math.round(K*((ok?1:0)-p));
+  const curN = acConcept ? (acConcept.n_attempts || 0) : (c.n_attempts || 0);
+
+  const p = expected(curElo, ITEM_ELO);
+  const d = Math.round(K*((ok?1:0)-p));
   c.elo = curElo + d;
-  if (acConcept) acConcept.elo = c.elo;
+  c.n_attempts = curN + 1;
+
+  if (acConcept) {
+    acConcept.elo = c.elo;
+    acConcept.n_attempts = c.n_attempts;
+  }
   return d;
 }
 
@@ -668,6 +831,102 @@ function questionsFor(c){
 }
 
 /* ===== LOOP STATE ===== */
+let sidebarOpen = true, panelOpen = true;
+
+function toggleSidebar(){
+  sidebarOpen = !sidebarOpen;
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("btnSidebar");
+  if(sidebarOpen){
+    document.documentElement.style.setProperty("--sidebar-w", "235px");
+    if(s) s.classList.remove("collapsed");
+    if(b) b.innerHTML = "◀ Sidebar";
+  } else {
+    document.documentElement.style.setProperty("--sidebar-w", "0px");
+    if(s) s.classList.add("collapsed");
+    if(b) b.innerHTML = "▶ Sidebar";
+  }
+}
+
+function togglePanel(){
+  panelOpen = !panelOpen;
+  const p = document.querySelector(".panel");
+  const b = document.getElementById("btnPanel");
+  if(panelOpen){
+    document.documentElement.style.setProperty("--panel-w", "370px");
+    if(p) p.classList.remove("collapsed");
+    if(b) b.innerHTML = "Panel ▶";
+  } else {
+    document.documentElement.style.setProperty("--panel-w", "0px");
+    if(p) p.classList.add("collapsed");
+    if(b) b.innerHTML = "Panel ◀";
+  }
+}
+
+function initResizers(){
+  const layout = document.getElementById("appLayout");
+  const resizerLeft = document.getElementById("resizerLeft");
+  const resizerRight = document.getElementById("resizerRight");
+
+  let isResizingLeft = false;
+  let isResizingRight = false;
+
+  if(resizerLeft){
+    resizerLeft.addEventListener("mousedown", ()=>{
+      isResizingLeft = true;
+      resizerLeft.classList.add("resizing");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    });
+  }
+
+  if(resizerRight){
+    resizerRight.addEventListener("mousedown", ()=>{
+      isResizingRight = true;
+      resizerRight.classList.add("resizing");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    });
+  }
+
+  document.addEventListener("mousemove", e=>{
+    if(!isResizingLeft && !isResizingRight) return;
+    const rect = layout.getBoundingClientRect();
+
+    if(isResizingLeft){
+      let w = e.clientX - rect.left;
+      if(w < 120) w = 120;
+      if(w > 480) w = 480;
+      document.documentElement.style.setProperty("--sidebar-w", w + "px");
+    }
+
+    if(isResizingRight){
+      let w = rect.right - e.clientX;
+      if(w < 200) w = 200;
+      if(w > 650) w = 650;
+      document.documentElement.style.setProperty("--panel-w", w + "px");
+    }
+  });
+
+  document.addEventListener("mouseup", ()=>{
+    if(isResizingLeft){
+      isResizingLeft = false;
+      if(resizerLeft) resizerLeft.classList.remove("resizing");
+    }
+    if(isResizingRight){
+      isResizingRight = false;
+      if(resizerRight) resizerRight.classList.remove("resizing");
+    }
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+  });
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initResizers);
+} else {
+  initResizers();
+}
+
 let phase = 0, round = 1, genSelected = new Set();
 let startSnapshot = null;   // mastery lúc bắt đầu vòng 1 (để tính outcome)
 let trained = new Set();    // concept đã luyện qua các vòng
@@ -685,35 +944,133 @@ function mrow(name, p, extra="", clickSlide=null){
 }
 
 /* PHASE 0: config */
+let showAllConcepts = false;
+
 async function renderGenConcepts(){
-  // Fetch concepts from backend
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   try {
     const res = await fetch(`http://localhost:8000/concepts/${dayName}`);
     if (res.ok) {
       const data = await res.json();
-      window.CURRENT_CONCEPTS = data;
+      if (data && data.length) window.CURRENT_CONCEPTS = data;
     }
   } catch (e) {
     console.error("Lỗi fetch concepts:", e);
-    window.CURRENT_CONCEPTS = [];
   }
+  renderConceptsUI();
+}
 
+function renderConceptsUI(){
   const AC = activeConcepts();
   const sorted = [...AC].sort((a,b)=>a.elo-b.elo);
-  if(genSelected.size===0) sorted.slice(0, Math.max(2, sorted.filter(c=>pct(c.elo)<50).length)).forEach(c=>genSelected.add(c.id));
   
-  const dayNameDisplay = DAYS[curDay] ? DAYS[curDay].name : "Day05";
-  document.getElementById("genConcepts").innerHTML =
-    `<div style="font-size:.62rem;color:var(--muted);margin-bottom:5px">📄 Concept của <b>${dayNameDisplay}</b> (Tải từ DB)</div>` +
-    sorted.map(c=>{
-      const p = pct(c.elo), cls = p>=65?"ok":p>=50?"mid":"low";
-      return `<span class="cchip ${genSelected.has(c.id)?'sel':''}" onclick="toggleGenC('${c.id}')">${c.name}<span class="cp ${cls}">${p}%</span></span>`;
+  if(genSelected.size===0 && sorted.length > 0){
+    sorted.slice(0, Math.min(5, sorted.length)).forEach(c=>genSelected.add(c.id));
+  }
+  
+  const limit = showAllConcepts ? sorted.length : 5;
+  const visible = sorted.slice(0, limit);
+  const hiddenCount = sorted.length - 5;
+  
+  const container = document.getElementById("genConceptsList");
+  if(container){
+    container.innerHTML = visible.map(c=>{
+      const p = pct(c);
+      const isSel = genSelected.has(c.id);
+      const barColor = p>=65 ? "var(--green)" : p>=50 ? "var(--blue)" : "var(--amber)";
+      return `
+        <div class="concept-item ${isSel?'sel':''}" onclick="toggleGenC('${c.id}')">
+          <input type="checkbox" ${isSel?'checked':''} onclick="event.stopPropagation(); toggleGenC('${c.id}')">
+          <div class="c-info">
+            <div class="c-name">${c.name}</div>
+            <div class="c-bar-wrap">
+              <div class="c-bar-inner" style="width:${p}%; background:${barColor}"></div>
+            </div>
+          </div>
+          <span class="c-pct">${p}%</span>
+        </div>
+      `;
     }).join("");
+  }
+
+  const btnMore = document.getElementById("btnToggleMoreConcepts");
+  if(btnMore){
+    if(sorted.length > 5){
+      btnMore.style.display = "block";
+      btnMore.innerHTML = showAllConcepts ? "▲ Thu gọn danh sách" : `▼ Xem thêm ${hiddenCount} concept khác`;
+    } else {
+      btnMore.style.display = "none";
+    }
+  }
+
+  updateSummary();
 }
-function toggleGenC(id){ genSelected.has(id) ? genSelected.delete(id) : genSelected.add(id); renderGenConcepts(); }
+
+function toggleGenC(id){
+  if(genSelected.has(id)){
+    genSelected.delete(id);
+  } else {
+    genSelected.add(id);
+  }
+  renderConceptsUI();
+}
+
+function toggleMoreConcepts(){
+  showAllConcepts = !showAllConcepts;
+  renderConceptsUI();
+}
+
+function toggleSelectAllConcepts(){
+  const AC = activeConcepts();
+  if(genSelected.size === AC.length){
+    genSelected.clear();
+    const sorted = [...AC].sort((a,b)=>a.elo-b.elo);
+    sorted.slice(0, Math.min(5, sorted.length)).forEach(c=>genSelected.add(c.id));
+  } else {
+    AC.forEach(c=>genSelected.add(c.id));
+  }
+  renderConceptsUI();
+}
+
+function updateGenN(val){
+  document.getElementById("genNv").textContent = val + " câu";
+  updateSummary();
+}
+
+function updateSummary(){
+  const count = genSelected.size;
+  const n = document.getElementById("genN") ? document.getElementById("genN").value : 4;
+  const diffEl = document.querySelector("input[name=gdiff]:checked");
+  const diffVal = diffEl ? diffEl.value : "auto";
+  const diffText = diffVal === "easy" ? "Dễ (P≈75%)" : diffVal === "hard" ? "Thử thách (P≈30%)" : "Phù hợp ★";
+
+  const elSelCount = document.getElementById("selCount");
+  if(elSelCount) elSelCount.textContent = count;
+
+  const elQsCount = document.getElementById("qsCount");
+  if(elQsCount) elQsCount.textContent = `${count} concept`;
+
+  const elQsN = document.getElementById("qsN");
+  if(elQsN) elQsN.textContent = `${n} câu hỏi`;
+
+  const elQsDiff = document.getElementById("qsDiff");
+  if(elQsDiff) elQsDiff.textContent = diffText;
+
+  const btnSelAll = document.getElementById("btnSelAll");
+  if(btnSelAll){
+    const AC = activeConcepts();
+    btnSelAll.textContent = (genSelected.size === AC.length) ? "Thu gọn chọn" : "Chọn tất cả";
+  }
+}
+
 document.addEventListener("click", e=>{
-  const d = e.target.closest(".diffopt"); if(d){ document.querySelectorAll(".diffopt").forEach(x=>x.classList.remove("sel")); d.classList.add("sel"); d.querySelector("input").checked = true; }
+  const d = e.target.closest(".seg-item");
+  if(d){
+    document.querySelectorAll(".seg-item").forEach(x=>x.classList.remove("active"));
+    d.classList.add("active");
+    const inp = d.querySelector("input");
+    if(inp){ inp.checked = true; updateSummary(); }
+  }
 });
 
 /* PHASE 1: quiz */
@@ -722,7 +1079,8 @@ async function startQuiz(){
   document.getElementById("genLoading").style.display = "block";
   
   const n = +document.getElementById("genN").value;
-  const diff = document.querySelector("input[name=gdiff]:checked").value;
+  const diffEl = document.querySelector("input[name=gdiff]:checked");
+  const diff = diffEl ? diffEl.value : "auto";
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   
   try {
@@ -750,7 +1108,7 @@ async function startQuiz(){
     chosen.forEach(c=>trained.add(c.id));
     
     if(!startSnapshot) startSnapshot = {};
-    chosen.forEach(c=>{ if(!(c.id in startSnapshot)) startSnapshot[c.id] = {name:c.name, p:pct(c.elo), slides:c.slides}; });
+    chosen.forEach(c=>{ if(!(c.id in startSnapshot)) startSnapshot[c.id] = {name:c.name, p:pct(c), slides:c.slides}; });
     
     document.getElementById("quizBox").innerHTML =
       `<div class="sub">Vòng ${round} · ${curItems.length} câu hỏi lấy từ DB · độ khó ${diff==="auto"?"P≈50% theo Elo cá nhân":diff==="easy"?"dễ":"thử thách"}</div>` +
@@ -788,14 +1146,14 @@ function submitQuiz(){
   const involved = [...new Set(curItems.map(r=>r.c.id))].map(id=>AC.find(c=>c.id===id));
   document.getElementById("scoreHero").innerHTML =
     `<span class="bignum">${ok}/${curItems.length}</span><div style="font-size:.7rem;color:var(--muted)">Vòng ${round} · Elo đã cập nhật theo từng câu</div>`;
-  document.getElementById("masteryBox").innerHTML = involved.map(c=>mrow(c.name,pct(c.elo),"",c.slides[0])).join("");
+  document.getElementById("masteryBox").innerHTML = involved.map(c=>mrow(c.name,pct(c),"",c.slides?c.slides[0]:null)).join("");
   document.getElementById("eloNote").innerHTML = "<b>Elo (chạy thật):</b><br>"+notes.join("<br>");
 
   // lộ trình ôn: concept yếu trong số vừa luyện
-  let weakNow = involved.filter(c=>pct(c.elo)<50);
+  let weakNow = involved.filter(c=>pct(c)<50);
   if(!weakNow.length) weakNow = [...involved].sort((a,b)=>a.elo-b.elo).slice(0,1);
   targets = [];
-  weakNow.forEach(c=>c.slides.forEach(s=>{ if(targets.length<3) targets.push({c,s}); }));
+  weakNow.forEach(c=>{ if(c && c.slides) c.slides.forEach(s=>{ if(targets.length<3) targets.push({c,s}); }); });
   readN = 0;
   if(targets.length){
     document.getElementById("reviewBlock").style.display = "block";
@@ -837,8 +1195,8 @@ document.getElementById("btnNextRound").onclick = ()=>{
 function finishLoop(){
   const AC = activeConcepts();
   const ids = [...trained].filter(id=>startSnapshot[id]);
-  const bAvg = Math.round(ids.reduce((a,id)=>a+startSnapshot[id].p,0)/ids.length);
-  const aAvg = Math.round(ids.reduce((a,id)=>{const c=AC.find(x=>x.id===id)||D5.find(x=>x.id===id);return a+pct(c.elo);},0)/ids.length);
+  const bAvg = Math.round(ids.reduce((a,id)=>a+startSnapshot[id].p,0)/ids.length) || 0;
+  const aAvg = Math.round(ids.reduce((a,id)=>{const c=AC.find(x=>x.id===id)||D5.find(x=>x.id===id);return a+pct(c);},0)/ids.length) || 0;
   document.getElementById("nRounds").textContent = round;
   document.getElementById("rBefore").textContent = bAvg+"%";
   document.getElementById("rAfter").textContent = aAvg+"%";
@@ -847,7 +1205,7 @@ function finishLoop(){
   document.getElementById("cbBefore").innerHTML = ids.map(id=>mrow(startSnapshot[id].name, startSnapshot[id].p)).join("");
   document.getElementById("cbAfter").innerHTML = ids.map(id=>{
     const c = AC.find(x=>x.id===id)||D5.find(x=>x.id===id);
-    const b = startSnapshot[id].p, n = pct(c.elo), d2 = n-b;
+    const b = startSnapshot[id].p, n = pct(c), d2 = n-b;
     return mrow(c.name, n, `<span class="delta ${d2>=0?'up':'down'}">${d2>=0?'+':''}${d2}</span>`);
   }).join("");
   setPhase(3);
@@ -865,7 +1223,8 @@ function doLogin(){
   const em = document.getElementById("liEmail").value.trim();
   const pw = document.getElementById("liPass").value;
   if(!em || !pw){ document.getElementById("liErr").textContent = "Điền đủ email và mật khẩu"; return; }
-  USER = {name:"Minh Anh", email:em, isNew:false};
+  const nameFromEmail = em.split("@")[0] || "Học viên";
+  USER = {name: nameFromEmail, email: em, isNew: false};
   enterApp();
 }
 function doRegister(){
@@ -891,7 +1250,8 @@ function finishSurvey(){
 }
 function enterApp(){
   document.getElementById("authOverlay").classList.add("hide");
-  document.getElementById("userChip").textContent = "👤 " + USER.name;
+  const uEl = document.getElementById("userNameTxt");
+  if (uEl) uEl.textContent = USER.name;
   genSelected.clear();
   renderGenConcepts();
   const sub = document.querySelector("#p0 .sub");

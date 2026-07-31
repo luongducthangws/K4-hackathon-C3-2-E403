@@ -8,7 +8,7 @@ import requests
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import AIMessage, HumanMessage
 from sqlalchemy.orm import Session
@@ -52,6 +52,12 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def read_root():
+    html_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vlearn-adaptive-loop-v7.html")
+    return FileResponse(html_path)
+
+
 @app.post("/chat")
 def chat_with_slide(
     request: ChatRequest,
@@ -60,10 +66,8 @@ def chat_with_slide(
 ):
     if not user_id:
         raise HTTPException(status_code=401, detail="Missing user_id in headers")
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=503, detail="GEMINI_API_KEY chưa được cấu hình trên server")
-    if not FPT_API_KEY:
-        raise HTTPException(status_code=503, detail="FPT_API_KEY chưa được cấu hình trên server")
+    if not GEMINI_API_KEY and not FPT_API_KEY:
+        raise HTTPException(status_code=503, detail="Chưa cấu hình API Key (GEMINI_API_KEY hoặc FPT_API_KEY) trên server")
 
     thread_id = f"{user_id}_{request.lecture_id}"
     config = {"configurable": {"thread_id": thread_id}}
@@ -97,54 +101,74 @@ Nhiệm vụ của bạn:
 4. Khi dùng nội dung từ một slide cụ thể, TRÍCH SỐ SLIDE nguồn ngay trong câu trả lời, ví dụ "(Slide 8)", để học viên kiểm chứng lại được.
 5. Nếu câu hỏi không rõ ràng về bài giảng, hãy hỏi lại học viên để làm rõ ý và hướng họ về việc hỏi đáp kiến thức bài học."""
 
-        formatted_msgs = [{"role": "system", "content": sys_prompt}]
-        for msg in state["messages"]:
-            role = "assistant" if msg.type == "ai" else "user"
-            if msg.type != "system":
-                formatted_msgs.append({"role": role, "content": msg.content})
-
         def generate():
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {FPT_API_KEY}",
-            }
-            data = {
-                "model": FPT_MODEL,
-                "messages": formatted_msgs,
-                "stream": True,
-                "temperature": 0.1,
-            }
-
-            response = requests.post(FPT_API_URL, headers=headers, json=data, stream=True, timeout=120)
-            if not response.ok:
-                error = f"Lỗi gọi API: {response.text}"
-                yield f"data: {json.dumps({'answer': error}, ensure_ascii=False)}\n\n"
-                return
-
             full_answer = ""
-            for line in response.iter_lines():
-                if not line:
-                    continue
-                line_text = line.decode("utf-8")
-                if line_text.startswith("data: "):
-                    line_text = line_text[6:]
-                if line_text == "[DONE]":
-                    break
-                try:
-                    chunk_data = json.loads(line_text)
-                except json.JSONDecodeError:
-                    continue
+            if FPT_API_KEY:
+                formatted_msgs = [{"role": "system", "content": sys_prompt}]
+                for msg in state["messages"]:
+                    role = "assistant" if msg.type == "ai" else "user"
+                    if msg.type != "system":
+                        formatted_msgs.append({"role": role, "content": msg.content})
 
-                choices = chunk_data.get("choices", [])
-                if not choices:
-                    continue
-                delta = choices[0].get("delta", {})
-                content = delta.get("content", "")
-                reasoning = delta.get("reasoning_content", "")
-                if content:
-                    full_answer += content
-                if content or reasoning:
-                    yield f"data: {json.dumps({'answer': content, 'reasoning': reasoning}, ensure_ascii=False)}\n\n"
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {FPT_API_KEY}",
+                }
+                data = {
+                    "model": FPT_MODEL,
+                    "messages": formatted_msgs,
+                    "stream": True,
+                    "temperature": 0.1,
+                }
+
+                response = requests.post(FPT_API_URL, headers=headers, json=data, stream=True, timeout=120)
+                if not response.ok:
+                    error = f"Lỗi gọi API: {response.text}"
+                    yield f"data: {json.dumps({'answer': error}, ensure_ascii=False)}\n\n"
+                    return
+
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    line_text = line.decode("utf-8")
+                    if line_text.startswith("data: "):
+                        line_text = line_text[6:]
+                    if line_text == "[DONE]":
+                        break
+                    try:
+                        chunk_data = json.loads(line_text)
+                    except json.JSONDecodeError:
+                        continue
+
+                    choices = chunk_data.get("choices", [])
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta", {})
+                    content = delta.get("content", "")
+                    reasoning = delta.get("reasoning_content", "")
+                    if content:
+                        full_answer += content
+                    if content or reasoning:
+                        yield f"data: {json.dumps({'answer': content, 'reasoning': reasoning}, ensure_ascii=False)}\n\n"
+            else:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                from langchain_core.messages import SystemMessage
+
+                gemini_llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0.1)
+                langchain_msgs = [SystemMessage(content=sys_prompt)]
+                for msg in state["messages"]:
+                    if msg.type != "system":
+                        langchain_msgs.append(msg)
+
+                for chunk in gemini_llm.stream(langchain_msgs):
+                    content = chunk.content
+                    if content:
+                        if isinstance(content, list):
+                            text_content = "".join([item.get("text", "") for item in content if isinstance(item, dict) and "text" in item])
+                        else:
+                            text_content = str(content)
+                        full_answer += text_content
+                        yield f"data: {json.dumps({'answer': text_content, 'reasoning': ''}, ensure_ascii=False)}\n\n"
 
             graph_app.update_state(config, {"messages": [AIMessage(content=full_answer)]})
 
@@ -366,14 +390,15 @@ def get_concepts(lecture_id: str, x_user_id: Optional[int] = Header(None), db: S
     result = []
     for c in concepts:
         elo_val = 1400
+        n_att = 0
         if x_user_id:
-            elo_val, _ = _mastery_or_default(db, x_user_id, c.concept_id)
+            elo_val, n_att = _mastery_or_default(db, x_user_id, c.concept_id)
         slide_range = db.query(SlideConcept).filter(
             SlideConcept.lecture_id == real_lecture_id,
             SlideConcept.concept_id == c.concept_id,
         ).first()
         slides = list(range(slide_range.slide_start, slide_range.slide_end + 1)) if slide_range else []
-        result.append({"id": c.concept_id, "name": c.name, "elo": elo_val, "slides": slides})
+        result.append({"id": c.concept_id, "name": c.name, "elo": elo_val, "n_attempts": n_att, "slides": slides})
     return result
 
 
