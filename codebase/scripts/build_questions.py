@@ -27,7 +27,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parents[1]
+if not (ROOT / "data").exists() and Path(__file__).resolve().parents[2].joinpath("data").exists():
+    ROOT = Path(__file__).resolve().parents[2]
 PROCESSED = ROOT / "data" / "processed"
+
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from questions_d1_data import QUESTIONS_D1  # noqa: E402

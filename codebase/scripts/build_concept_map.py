@@ -29,7 +29,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parents[1]
+if not (ROOT / "data").exists() and Path(__file__).resolve().parents[2].joinpath("data").exists():
+    ROOT = Path(__file__).resolve().parents[2]
 PROCESSED = ROOT / "data" / "processed"
+
 
 LECTURE_SUMMARIES = {
     "d1-ai-llm-foundation": (

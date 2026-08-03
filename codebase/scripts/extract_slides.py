@@ -19,8 +19,11 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parents[1]
+if not (ROOT / "data").exists() and Path(__file__).resolve().parents[2].joinpath("data").exists():
+    ROOT = Path(__file__).resolve().parents[2]
 SLIDES_DIR = ROOT / "data" / "vlearn-pack" / "slides"
 OUT_DIR = ROOT / "data" / "processed"
+
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 THIN_TEXT_THRESHOLD = 50  # ky tu; duoi nguong nay -> fallback VLM/OCR

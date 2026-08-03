@@ -1,0 +1,291 @@
+[
+  {
+    "id": "TC-01",
+    "name": "Sai câu định nghĩa LLM - Day 01",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question_id": 3,
+      "lecture_id": "day01",
+      "user_answer": "AI là tập con của Deep Learning"
+    },
+    "expected": {
+      "concept_id": "llm-foundation",
+      "suggested_slides": [5, 6, 7, 8],
+      "status": "Pass"
+    },
+    "description": "Câu hỏi sai về định nghĩa cơ bản của LLM. Kỳ vọng hệ thống gợi ý đúng concept LLM Foundation và slide chứa hình sơ đồ tập hợp."
+  },
+  {
+    "id": "TC-02",
+    "name": "Sai câu Prompt Engineering - Day 01",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question_id": 7,
+      "lecture_id": "day01",
+      "user_answer": "Temperature = 0 làm câu trả lời sáng tạo hơn"
+    },
+    "expected": {
+      "concept_id": "prompt-design",
+      "suggested_slides": [15, 16, 17, 18],
+      "status": "Pass"
+    },
+    "description": "Học viên hiểu sai tác động của tham số temperature. Hệ thống cần định tuyến về concept Prompt Design và chỉ ra slide hướng dẫn tham số."
+  },
+  {
+    "id": "TC-03",
+    "name": "Sai câu Double Diamond - Day 02",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question_id": 12,
+      "lecture_id": "day02",
+      "user_answer": "Double Diamond gồm 3 giai đoạn"
+    },
+    "expected": {
+      "concept_id": "double-diamond",
+      "suggested_slides": [4, 5, 6, 7, 8, 9],
+      "status": "Pass"
+    },
+    "description": "Câu hỏi sai về quy trình khám phá bài toán bằng mô hình Double Diamond."
+  },
+  {
+    "id": "TC-04",
+    "name": "Sai câu định nghĩa Willing Users - Day 02",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question_id": 15,
+      "lecture_id": "day02",
+      "user_answer": "Willing user là bất cứ ai đồng ý làm khảo sát"
+    },
+    "expected": {
+      "concept_id": "willing-users",
+      "suggested_slides": [14, 15, 16, 17],
+      "status": "Pass"
+    },
+    "description": "Sai định nghĩa về willing user trong giai đoạn xác thực vấn đề."
+  },
+  {
+    "id": "TC-05",
+    "name": "Hỏi chatbot trực tiếp về Slide 23",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question": "Cho mình biết slide 23 nói về gì vậy?",
+      "lecture_id": "day01"
+    },
+    "expected": {
+      "is_relevant": true,
+      "slide_no": 23,
+      "contains_text": "Level 1"
+    },
+    "description": "Học viên hỏi cụ thể về nội dung của slide số 23 trong bài giảng Day 01."
+  },
+  {
+    "id": "TC-06",
+    "name": "Hỏi chatbot trực tiếp về Trang 10",
+    "class": "Ordinary (Thường)",
+    "input": {
+      "question": "Trang 10 có nội dung gì?",
+      "lecture_id": "day02"
+    },
+    "expected": {
+      "is_relevant": true,
+      "slide_no": 10,
+      "contains_text": "Xác định bài toán"
+    },
+    "description": "Học viên hỏi cụ thể về nội dung trang 10 của bài giảng Day 02."
+  },
+  {
+    "id": "TC-07",
+    "name": "Câu hỏi giao thoa giữa LLM và Prompt",
+    "class": "② Low-confidence",
+    "input": {
+      "question": "Temperature ảnh hưởng thế nào đến tính ngẫu nhiên của prompt?",
+      "lecture_id": "day01"
+    },
+    "expected": {
+      "concept_ids": ["llm-foundation", "prompt-design"],
+      "is_relevant": true
+    },
+    "description": "Câu hỏi chạm đến cả lý thuyết nền tảng (LLM sinh từ tiếp theo) và Prompting (thiết lập tham số)."
+  },
+  {
+    "id": "TC-08",
+    "name": "Câu hỏi sai liên quan Problem Statement kèm số liệu",
+    "class": "② Low-confidence",
+    "input": {
+      "question_id": 22,
+      "lecture_id": "day02",
+      "user_answer": "Problem statement chỉ cần mô tả nỗi đau, không cần định lượng"
+    },
+    "expected": {
+      "concept_ids": ["problem-statement", "metrics"],
+      "suggested_slides": [10, 11, 12, 13]
+    },
+    "description": "Câu hỏi kiểm tra tính định lượng của Problem Statement, liên quan đến cả cấu trúc phát biểu và cách đo lường."
+  },
+  {
+    "id": "TC-09",
+    "name": "Hỏi phân biệt Agent Workflow và Rule-based logic",
+    "class": "② Low-confidence",
+    "input": {
+      "question": "Khi nào nên dùng Agent workflow thay vì Rule-based logic?",
+      "lecture_id": "day02"
+    },
+    "expected": {
+      "concept_ids": ["agent-workflow", "rule-based"],
+      "is_relevant": true
+    },
+    "description": "Câu hỏi so sánh hai phương thức tự động hóa phức tạp."
+  },
+  {
+    "id": "TC-10",
+    "name": "Concept Problem Discovery trải dài ở nhiều slide",
+    "class": "② Low-confidence",
+    "input": {
+      "concept_id": "problem-discovery",
+      "lecture_id": "day02"
+    },
+    "expected": {
+      "suggested_slides_count": [3, 4, 5]
+    },
+    "description": "Concept rộng nói rải rác nhiều nơi. AI phải lọc để chỉ trả về tối đa 3-5 slide cốt lõi thay vì toàn bộ."
+  },
+  {
+    "id": "TC-11",
+    "name": "Concept LLM Temperature được nhắc ở nhiều slide",
+    "class": "② Low-confidence",
+    "input": {
+      "concept_id": "llm-temperature",
+      "lecture_id": "day01"
+    },
+    "expected": {
+      "suggested_slides": [25]
+    },
+    "description": "Hệ thống phải chọn slide chứa bảng định nghĩa chính thay vì các slide nhắc phụ."
+  },
+  {
+    "id": "TC-12",
+    "name": "Concept User Validation có cả slide lý thuyết và slide ví dụ",
+    "class": "② Low-confidence",
+    "input": {
+      "concept_id": "user-validation",
+      "lecture_id": "day02"
+    },
+    "expected": {
+      "suggested_slides": [35, 36, 37]
+    },
+    "description": "Hệ thống cần chọn đúng slide lý thuyết nền tảng và slide checklist kiểm chứng."
+  },
+  {
+    "id": "TC-13",
+    "name": "Sai câu hỏi nằm ngoài Concept Map",
+    "class": "① Không đủ căn cứ",
+    "input": {
+      "question_id": 999,
+      "lecture_id": "day02"
+    },
+    "expected": {
+      "message": "chưa đủ dữ liệu",
+      "suggested_slides": []
+    },
+    "description": "Học viên sai một câu hỏi mới/chưa được liên kết. Hệ thống phải từ chối gợi ý slide một cách an toàn."
+  },
+  {
+    "id": "TC-14",
+    "name": "Học viên hỏi kiến thức lập trình Python ngoài lề",
+    "class": "① Không đủ căn cứ",
+    "input": {
+      "question": "Cài đặt python như thế nào?",
+      "lecture_id": "day01"
+    },
+    "expected": {
+      "is_relevant": false,
+      "contains_rejection": true
+    },
+    "description": "Hỏi ngoài phạm vi bài giảng. AI cần phát hiện IRRELEVANT và lịch sự từ chối."
+  },
+  {
+    "id": "TC-15",
+    "name": "Attempt request có dữ liệu trống",
+    "class": "① Không đủ căn cứ",
+    "input": {
+      "question_id": 1,
+      "lecture_id": "day01",
+      "answer_idx": null
+    },
+    "expected": {
+      "error": true,
+      "status_code": 422
+    },
+    "description": "Kiểm thử lỗi dữ liệu đầu vào khi không có đáp án được chọn."
+  },
+  {
+    "id": "TC-16",
+    "name": "Câu hỏi bị lỗi đáp án từ giảng viên",
+    "class": "④ Domain",
+    "input": {
+      "report_issue": true,
+      "question_id": 5,
+      "student_answer_idx": 2
+    },
+    "expected": {
+      "skip_mastery_update": true,
+      "log_warning": true
+    },
+    "description": "Đáp án bị set sai index. Hệ thống không được giảm điểm mastery của học viên sau khi ghi nhận báo cáo lỗi."
+  },
+  {
+    "id": "TC-17",
+    "name": "Đề bài mâu thuẫn với nội dung text trên slide",
+    "class": "④ Domain",
+    "input": {
+      "concept_id": "prompt-format",
+      "question_id": 11
+    },
+    "expected": {
+      "low_confidence_flag": true
+    },
+    "description": "Mâu thuẫn dữ liệu giữa slide và câu hỏi. AI phải hạ độ chắc chắn khi gợi ý."
+  },
+  {
+    "id": "TC-18",
+    "name": "Mastery model có quá ít dữ liệu (1 attempt)",
+    "class": "② Low-confidence",
+    "input": {
+      "concept_id": "llm-foundation",
+      "user_attempts_count": 1
+    },
+    "expected": {
+      "confidence": "Dữ liệu còn ít"
+    },
+    "description": "Học viên mới trả lời 1 câu. Điểm mastery chưa thể khẳng định chắc chắn."
+  },
+  {
+    "id": "TC-19",
+    "name": "Mastery model chưa có dữ liệu (0 attempt)",
+    "class": "② Low-confidence",
+    "input": {
+      "concept_id": "prompt-design",
+      "user_attempts_count": 0
+    },
+    "expected": {
+      "elo": 1400,
+      "confidence": "Chưa có dữ liệu"
+    },
+    "description": "Truy vấn concept chưa từng học. Trả về ELO mặc định an toàn."
+  },
+  {
+    "id": "TC-20",
+    "name": "Lệch version slide bài giảng và concept map",
+    "class": "④ Domain",
+    "input": {
+      "lecture_id": "day02",
+      "slide_version": "v2",
+      "concept_map_version": "v1"
+    },
+    "expected": {
+      "prevent_suggestion": true,
+      "fallback_response": true
+    },
+    "description": "Lệch phiên bản slide sau khi cập nhật bài học. Hệ thống chặn gợi ý slide cũ để tránh ôn lệch chỗ."
+  }
+]

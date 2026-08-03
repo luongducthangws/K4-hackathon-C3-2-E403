@@ -15,7 +15,12 @@ def main():
     
     db = SessionLocal()
     
-    base_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "processed")
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_data_dir = os.path.join(parent_dir, "data", "processed")
+    if not os.path.exists(base_data_dir):
+        grandparent_dir = os.path.dirname(parent_dir)
+        base_data_dir = os.path.join(grandparent_dir, "data", "processed")
+
     
     for folder_name in os.listdir(base_data_dir):
         data_dir = os.path.join(base_data_dir, folder_name)
