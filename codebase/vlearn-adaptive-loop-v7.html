@@ -402,48 +402,14 @@
           <div class="fs on" id="p0">
             <div class="phase-header">
               <h3>Tạo Quiz Cá nhân hóa</h3>
-              <div class="sub">Tự động thiết kế câu hỏi dựa trên mức độ thành thạo hiện tại của bạn.</div>
-            </div>
-
-            <div class="gen-sec">
-              <div class="sec-title-row">
-                <h6>📚 Chủ đề được kiểm tra (<span id="selCount">0</span>)</h6>
-                <button class="link-btn" onclick="toggleSelectAllConcepts()" id="btnSelAll">Chọn tất cả</button>
-              </div>
-              
-              <div id="genConceptsList" class="concept-list-container"></div>
-              
-              <button class="more-btn" id="btnToggleMoreConcepts" onclick="toggleMoreConcepts()" style="display:none;"></button>
-            </div>
-
-            <div class="gen-sec" style="margin-top:14px">
-              <div class="sec-title">🎯 Số lượng câu hỏi</div>
-              <div class="stepper-wrap">
-                <input type="range" id="genN" min="3" max="8" value="4" oninput="updateGenN(this.value)">
-                <span class="stepper-val" id="genNv">4 câu</span>
-              </div>
-            </div>
-
-            <div class="gen-sec" style="margin-top:14px">
-              <div class="sec-title">⚡ Độ khó câu hỏi</div>
-              <div class="segmented-control">
-                <label class="seg-item">
-                  <input type="radio" name="gdiff" value="easy" onchange="updateSummary()">
-                  <span>Dễ</span>
-                </label>
-                <label class="seg-item active">
-                  <input type="radio" name="gdiff" value="auto" checked onchange="updateSummary()">
-                  <span>Phù hợp ★</span>
-                </label>
-                <label class="seg-item">
-                  <input type="radio" name="gdiff" value="hard" onchange="updateSummary()">
-                  <span>Thử thách</span>
-                </label>
-              </div>
+              <div class="sub">Tự động chọn concept yếu nhất, số câu và độ khó phù hợp với Elo của bạn — bấm Bắt đầu là xong.</div>
             </div>
 
             <div class="quiz-summary-card">
-              <div class="qs-head">📋 Tóm tắt lượt làm bài</div>
+              <div class="qs-head" style="display:flex;justify-content:space-between;align-items:center">
+                <span>📋 Tóm tắt lượt làm bài</span>
+                <button class="link-btn" onclick="toggleAdvancedGen()" id="btnAdvToggle" style="margin:0">⚙️ Tuỳ chỉnh</button>
+              </div>
               <div class="qs-body">
                 <div class="qs-row"><span>• Chủ đề:</span> <b id="qsCount">0 concept</b></div>
                 <div class="qs-row"><span>• Số lượng:</span> <b id="qsN">4 câu hỏi</b></div>
@@ -452,7 +418,46 @@
               </div>
             </div>
 
-            <button class="btn cta-btn" onclick="startQuiz()">⚡ Tạo Quiz Cá nhân hóa (Vòng <span id="rN1">1</span>)</button>
+            <div id="genAdvanced" style="display:none">
+              <div class="gen-sec">
+                <div class="sec-title-row">
+                  <h6>📚 Chủ đề được kiểm tra (<span id="selCount">0</span>)</h6>
+                  <button class="link-btn" onclick="toggleSelectAllConcepts()" id="btnSelAll">Chọn tất cả</button>
+                </div>
+
+                <div id="genConceptsList" class="concept-list-container"></div>
+
+                <button class="more-btn" id="btnToggleMoreConcepts" onclick="toggleMoreConcepts()" style="display:none;"></button>
+              </div>
+
+              <div class="gen-sec" style="margin-top:14px">
+                <div class="sec-title">🎯 Số lượng câu hỏi</div>
+                <div class="stepper-wrap">
+                  <input type="range" id="genN" min="3" max="8" value="4" oninput="updateGenN(this.value)">
+                  <span class="stepper-val" id="genNv">4 câu</span>
+                </div>
+              </div>
+
+              <div class="gen-sec" style="margin-top:14px">
+                <div class="sec-title">⚡ Độ khó câu hỏi</div>
+                <div class="segmented-control">
+                  <label class="seg-item">
+                    <input type="radio" name="gdiff" value="easy" onchange="updateSummary()">
+                    <span>Dễ</span>
+                  </label>
+                  <label class="seg-item active">
+                    <input type="radio" name="gdiff" value="auto" checked onchange="updateSummary()">
+                    <span>Phù hợp ★</span>
+                  </label>
+                  <label class="seg-item">
+                    <input type="radio" name="gdiff" value="hard" onchange="updateSummary()">
+                    <span>Thử thách</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn cta-btn" onclick="startQuiz()">⚡ Bắt đầu vòng ôn tập (Vòng <span id="rN1">1</span>)</button>
 
             <div id="genLoading" style="display:none;text-align:center;padding:16px;font-size:.74rem;color:var(--muted)">
               <div class="spin"></div>Đang chọn câu hỏi phù hợp từ cơ sở dữ liệu…
@@ -507,6 +512,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ===== API BASE ===== */
+const API_BASE_URL = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? "http://localhost:8000"
+  : "https://panels-generator-passengers-ruth.trycloudflare.com";
+
 /* ===== TOAST ===== */
 let toastT;
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1800);}
@@ -575,13 +585,13 @@ async function renderSlide(){
 
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   try {
-    const res = await fetch(`http://localhost:8000/slides/${dayName}/${curPage}`);
+    const res = await fetch(`${API_BASE_URL}/slides/${dayName}/${curPage}`);
     if(!res.ok) throw new Error("Not found");
     const data = await res.json();
     
     // Hiển thị slide PDF gốc
     const pdfFile = dayName === "day01" ? "d1-slide-hackathon.pdf" : "d2-slide-hackathon.pdf";
-    document.getElementById("slBody").innerHTML = `<iframe src="http://localhost:8000/static_slides/${pdfFile}#page=${curPage}&view=FitH" width="100%" height="100%" style="border:none; border-radius:8px; box-shadow:0 8px 28px rgba(20,40,90,.10);"></iframe>`;
+    document.getElementById("slBody").innerHTML = `<iframe src="${API_BASE_URL}/static_slides/${pdfFile}#page=${curPage}&view=FitH" width="100%" height="100%" style="border:none; border-radius:8px; box-shadow:0 8px 28px rgba(20,40,90,.10);"></iframe>`;
   } catch(e) {
     document.getElementById("slBody").innerHTML = "<i style='color:#98a0ae'>Slide không có nội dung text (hoặc chưa bật server API)...</i>";
   }
@@ -641,7 +651,7 @@ async function sendChat(){
 
   try {
     const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
-    const res = await fetch("http://localhost:8000/chat", {
+    const res = await fetch(`${API_BASE_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -779,7 +789,7 @@ const DAY_CONCEPTS = {
   4:D5,
 };
 function activeConcepts(){ return window.CURRENT_CONCEPTS || D5; }
-const ITEM_ELO = 1500, K = 64;
+const ITEM_ELO = 1500;
 const expected = (s,d)=>1/(1+Math.pow(10,(d-s)/400));
 const pct = (c_or_elo, n_att)=>{
   let elo = typeof c_or_elo === 'object' ? c_or_elo.elo : c_or_elo;
@@ -787,23 +797,6 @@ const pct = (c_or_elo, n_att)=>{
   if(!n || n === 0) return 0;
   return Math.round(expected(elo, ITEM_ELO)*100);
 };
-
-function upd(c,ok){
-  const acConcept = activeConcepts().find(x => x.id === c.id);
-  const curElo = acConcept ? acConcept.elo : c.elo;
-  const curN = acConcept ? (acConcept.n_attempts || 0) : (c.n_attempts || 0);
-
-  const p = expected(curElo, ITEM_ELO);
-  const d = Math.round(K*((ok?1:0)-p));
-  c.elo = curElo + d;
-  c.n_attempts = curN + 1;
-
-  if (acConcept) {
-    acConcept.elo = c.elo;
-    acConcept.n_attempts = c.n_attempts;
-  }
-  return d;
-}
 
 /* ngân hàng câu (Bài 5 thật; day khác mock — bản thật do LLM sinh offline) */
 const QBANK = {
@@ -949,7 +942,7 @@ let showAllConcepts = false;
 async function renderGenConcepts(){
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   try {
-    const res = await fetch(`http://localhost:8000/concepts/${dayName}`);
+    const res = await fetch(`${API_BASE_URL}/concepts/${dayName}`, { headers: authHeaders() });
     if (res.ok) {
       const data = await res.json();
       if (data && data.length) window.CURRENT_CONCEPTS = data;
@@ -1020,6 +1013,14 @@ function toggleMoreConcepts(){
   renderConceptsUI();
 }
 
+function toggleAdvancedGen(){
+  const el = document.getElementById("genAdvanced");
+  const btn = document.getElementById("btnAdvToggle");
+  const show = el.style.display === "none";
+  el.style.display = show ? "block" : "none";
+  if(btn) btn.textContent = show ? "⚙️ Ẩn tuỳ chỉnh" : "⚙️ Tuỳ chỉnh";
+}
+
 function toggleSelectAllConcepts(){
   const AC = activeConcepts();
   if(genSelected.size === AC.length){
@@ -1084,9 +1085,9 @@ async function startQuiz(){
   const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
   
   try {
-    const res = await fetch("http://localhost:8000/quiz/generate", {
+    const res = await fetch(`${API_BASE_URL}/quiz/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({
         lecture_id: dayName,
         concept_ids: [...genSelected],
@@ -1131,17 +1132,49 @@ async function startQuiz(){
 }
 
 /* PHASE 2: result + review */
-function submitQuiz(){
-  let ok = 0; const notes = [];
-  curItems.forEach((r,i)=>{
-    const v = +document.querySelector(`input[name=q${i}]:checked`).value;
-    const good = v===r.item.ans; if(good) ok++;
-    const d = upd(r.c, good);
-    notes.push(`Câu ${i+1} (${r.c.name}): ${good?"✓":"✗"} → Elo ${d>=0?"+":""}${d}`);
-    const os = document.querySelectorAll(`input[name=q${i}]`);
-    os[r.item.ans].parentElement.classList.add("correct");
-    if(!good) os[v].parentElement.classList.add("wrong");
+async function submitAttempt(r, answerIdx){
+  const res = await fetch(`${API_BASE_URL}/attempts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      question_id: r.item.question_id,
+      answer_idx: answerIdx,
+      round_no: round
+    })
   });
+  if(!res.ok) throw new Error((await res.json().catch(()=>({}))).detail || "API /attempts lỗi");
+  return res.json();
+}
+
+async function submitQuiz(){
+  const btnSubmit = document.getElementById("btnSubmit");
+  btnSubmit.disabled = true;
+  let ok = 0; const notes = [];
+  for(let i=0; i<curItems.length; i++){
+    const r = curItems[i];
+    const v = +document.querySelector(`input[name=q${i}]:checked`).value;
+    let result;
+    try {
+      result = await submitAttempt(r, v);
+    } catch(e){
+      toast("Lỗi lưu kết quả vào DB: " + e.message);
+      btnSubmit.disabled = false;
+      return;
+    }
+    const good = result.correct; if(good) ok++;
+    notes.push(`Câu ${i+1} (${r.c.name}): ${good?"✓":"✗"} → Elo ${result.elo_delta>=0?"+":""}${result.elo_delta}`);
+
+    const acConcept = activeConcepts().find(x=>x.id===r.c.id);
+    r.c.elo = result.user_elo_new;
+    if(acConcept){
+      acConcept.elo = result.user_elo_new;
+      acConcept.n_attempts = (acConcept.n_attempts||0) + 1;
+    }
+
+    const os = document.querySelectorAll(`input[name=q${i}]`);
+    os[result.correct_answer_idx].parentElement.classList.add("correct");
+    if(!good) os[v].parentElement.classList.add("wrong");
+  }
   const AC = activeConcepts();
   const involved = [...new Set(curItems.map(r=>r.c.id))].map(id=>AC.find(c=>c.id===id));
   document.getElementById("scoreHero").innerHTML =
@@ -1213,38 +1246,75 @@ function finishLoop(){
 
 /* ===== AUTH ===== */
 let USER = null;
+function authHeaders(){
+  return (USER && USER.user_id) ? {"x-user-id": String(USER.user_id)} : {};
+}
 function authTab(t){
   document.querySelectorAll("#authTabs button").forEach((b,i)=>b.classList.toggle("on", (t==="login")===(i===0)));
   document.getElementById("afLogin").classList.toggle("on", t==="login");
   document.getElementById("afReg").classList.toggle("on", t==="reg");
   document.getElementById("afSurvey").classList.remove("on");
 }
-function doLogin(){
+async function doLogin(){
   const em = document.getElementById("liEmail").value.trim();
   const pw = document.getElementById("liPass").value;
   if(!em || !pw){ document.getElementById("liErr").textContent = "Điền đủ email và mật khẩu"; return; }
-  const nameFromEmail = em.split("@")[0] || "Học viên";
-  USER = {name: nameFromEmail, email: em, isNew: false};
-  enterApp();
+  document.getElementById("liErr").textContent = "";
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: em })
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){ document.getElementById("liErr").textContent = data.detail || "Đăng nhập thất bại"; return; }
+    USER = { user_id: data.user_id, name: data.name, email: data.email, isNew: false };
+    enterApp();
+  } catch(e) {
+    document.getElementById("liErr").textContent = "Không kết nối được server: " + e.message;
+  }
 }
-function doRegister(){
+async function doRegister(){
   const nm = document.getElementById("rgName").value.trim();
   const em = document.getElementById("rgEmail").value.trim();
   const pw = document.getElementById("rgPass").value;
   if(!nm || !em || pw.length<6){ document.getElementById("rgErr").textContent = "Điền đủ thông tin, mật khẩu ≥ 6 ký tự"; return; }
-  USER = {name:nm, email:em, isNew:true};
-  document.getElementById("afReg").classList.remove("on");
-  document.getElementById("afSurvey").classList.add("on");
+  document.getElementById("rgErr").textContent = "";
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: nm, email: em })
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){ document.getElementById("rgErr").textContent = data.detail || "Đăng ký thất bại"; return; }
+    USER = { user_id: data.user_id, name: data.name, email: data.email, isNew: true };
+    document.getElementById("afReg").classList.remove("on");
+    document.getElementById("afSurvey").classList.add("on");
+  } catch(e) {
+    document.getElementById("rgErr").textContent = "Không kết nối được server: " + e.message;
+  }
 }
-function finishSurvey(){
-  // khảo sát đầu vào → Elo prior: 1200 + 100 × mức tự đánh giá (1–5)
-  const v1 = +document.getElementById("sv1").value; // regularization → c3, c4
-  const v2 = +document.getElementById("sv2").value; // bias-variance, overfitting → c1, c2
-  const v3 = +document.getElementById("sv3").value; // dropout, early stopping → c5, c6
-  const prior = v => 1200 + 100*v;
-  D5.find(c=>c.id==="c3").elo = prior(v1); D5.find(c=>c.id==="c4").elo = prior(v1) - 30;
-  D5.find(c=>c.id==="c1").elo = prior(v2); D5.find(c=>c.id==="c2").elo = prior(v2) + 40;
-  D5.find(c=>c.id==="c5").elo = prior(v3) + 40; D5.find(c=>c.id==="c6").elo = prior(v3);
+async function finishSurvey(){
+  // khảo sát đầu vào → Elo prior: 1200 + 100 × mức tự đánh giá (1–5), áp cho mọi concept của bài giảng
+  const v1 = +document.getElementById("sv1").value;
+  const v2 = +document.getElementById("sv2").value;
+  const v3 = +document.getElementById("sv3").value;
+  const avgV = Math.max(1, Math.min(5, Math.round((v1+v2+v3)/3)));
+  const dayName = DAYS[curDay] ? DAYS[curDay].name.toLowerCase() : "day01";
+  try {
+    const cRes = await fetch(`${API_BASE_URL}/concepts/${dayName}`);
+    const concepts = cRes.ok ? await cRes.json() : [];
+    if(concepts.length){
+      await fetch(`${API_BASE_URL}/users/me/survey`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ lecture_id: dayName, ratings: concepts.map(c=>({concept_id:c.id, v:avgV})) })
+      });
+    }
+  } catch(e) {
+    console.error("Lỗi khởi tạo mastery từ khảo sát:", e);
+  }
   enterApp();
   toast(`Đã khởi tạo mastery từ khảo sát — quiz đầu tiên sẽ đúng trình độ của ${USER.name}`);
 }

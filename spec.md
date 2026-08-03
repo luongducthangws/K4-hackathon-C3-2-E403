@@ -189,11 +189,11 @@ AI hỗ trợ phân loại câu sai và xếp hạng slide, nhưng học viên l
 
 | Người | Sở hữu chính | Deliverable |
 |---|---|---|
-| **Lương Hữu Thắng** | Concept map | Danh sách concept, prerequisite, map concept → slide và version. |
+| **Lương Đức Thắng** | Concept map | Danh sách concept, prerequisite, map concept → slide và version. |
 | **Nguyễn Hoàng Vũ** | Mapping quiz → concept | Schema, nhãn câu hỏi, rule/AI mapping và bộ test mapping. |
 | **Lương Trí Tuệ** | Mastery model | Công thức cập nhật mastery, confidence và xử lý ít dữ liệu. |
 | **Phùng Đình Đạt** | UI | Màn kết quả, thẻ concept, danh sách 3–5 slide, feedback. |
-| **Lương Hữu Thắng** | Validation | Log analysis, tuyển người thử, phỏng vấn và báo cáo metric. |
+| **Lương Đức Thắng** | Validation | Log analysis, tuyển người thử, phỏng vấn và báo cáo metric. |
 
 ### Validation CP5
 
