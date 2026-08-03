@@ -13,7 +13,12 @@ def seed_all():
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
-    base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "processed")
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.path.join(parent_dir, "data", "processed")
+    if not os.path.exists(base_dir):
+        grandparent_dir = os.path.dirname(parent_dir)
+        base_dir = os.path.join(grandparent_dir, "data", "processed")
+
 
     for folder_name in os.listdir(base_dir):
         folder_path = os.path.join(base_dir, folder_name)

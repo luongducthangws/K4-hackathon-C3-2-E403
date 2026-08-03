@@ -179,7 +179,12 @@ Nhiệm vụ của bạn:
 
 
 # ============ Static slides ============
-slides_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "vlearn-pack", "slides")
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+slides_dir = os.path.join(parent_dir, "data", "vlearn-pack", "slides")
+if not os.path.exists(slides_dir):
+    grandparent_dir = os.path.dirname(parent_dir)
+    slides_dir = os.path.join(grandparent_dir, "data", "vlearn-pack", "slides")
+
 
 
 @app.get("/debug_slides")
